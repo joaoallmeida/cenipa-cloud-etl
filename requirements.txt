@@ -1,0 +1,2 @@
+polars==0.18.4
+python-logstash==0.4.8
