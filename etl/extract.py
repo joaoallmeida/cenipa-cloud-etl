@@ -20,7 +20,7 @@ class Extract:
             try:
                 df = self.read_csv_with_encoding(f'data/{table}.csv', ['utf-8', 'latin-1'])
                 self.logger.info(f'Complete data capture from table -> {table}', extra=extra_fields(Step.READ,Status.COMPLETED, table, len(df.rows())))
-                self.upload_raw_data(df, table)
+                self.__upload_raw_data(df, table)
             except Exception as e:
                 self.logger.error(f'Failure to read data from table {table}: {traceback.format_exc()}', extra=extra_fields(Step.READ, Status.FAILURE, table))
                 raise e
@@ -39,7 +39,7 @@ class Extract:
         raise Exception(f'Failed to read CSV file: {file_path} with available encodings')
 
 
-    def upload_raw_data(self, df:pl.DataFrame, table_name:str) -> None:
+    def __upload_raw_data(self, df:pl.DataFrame, table_name:str) -> None:
 
         dt_str = datetime.now().strftime('%Y%m%d%H')
         path = f"s3://{self.bucket}/raw/{table_name}/{table_name}_{dt_str}.parquet"

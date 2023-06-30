@@ -3,6 +3,8 @@ from datetime import datetime
 import logging
 import enum
 import pymongo
+import socket
+import getpass
 
 
 class Status(enum.Enum):
@@ -81,6 +83,9 @@ class MongoHandler(Handler):
     def emit(self, record:LogRecord) -> None:
         message =  {
                 "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'),
+                "hostname": socket.gethostname(),
+                "host": socket.gethostbyname(socket.gethostname()),
+                "user": getpass.getuser(),
                 "level": record.levelno,
                 "level_name": record.levelname,
                 "message": record.getMessage(),
@@ -107,19 +112,9 @@ class Logger(object):
         
         self.collection = project_name if collection == 'log' else collection
         
-    def start(self):
+    def config(self):
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s -> %(message)s')
         self.logger = logging.getLogger(self.project_name)
         self.logger.setLevel(logging.INFO)
         self.logger.addHandler(MongoHandler( self.host, self.port, self.database, self.collection, self.drop ))
-
-        # self.logger.info('Init', extra=extra_fields(Step.START, Status.PROCESSING))
-
         return self.logger
-    
-    def end(self, status:enum.Enum):
-
-        if self.logger is None:
-            raise Exception("Logger has not been initialized.")
-        
-        self.logger.info('End', extra=extra_fields(Step.END, status))

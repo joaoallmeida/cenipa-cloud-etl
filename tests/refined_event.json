@@ -1,0 +1,58 @@
+{
+    "aeronave": {
+        "columns_str": [
+            "aeronave_matricula",
+            "aeronave_operador_categoria",
+            "aeronave_tipo_veiculo",
+            "aeronave_fabricante",
+            "aeronave_modelo",
+            "aeronave_motor_tipo",
+            "aeronave_motor_quantidade",
+            "aeronave_pais_fabricante",
+            "aeronave_pais_registro",
+            "aeronave_registro_categoria",
+            "aeronave_registro_segmento",
+            "aeronave_voo_origem",
+            "aeronave_voo_destino",
+            "aeronave_fase_operacao",
+            "aeronave_tipo_operacao",
+            "aeronave_nivel_dano"
+        ],
+        "columns_date": []
+    },
+    "ocorrencia_tipo": {
+        "columns_str": [
+            "ocorrencia_tipo",
+            "ocorrencia_tipo_categoria"
+        ],
+        "columns_date": []
+    },
+    "ocorrencia": {
+        "columns_str": [
+            "ocorrencia_classificacao",
+            "ocorrencia_cidade",
+            "ocorrencia_pais",
+            "investigacao_aeronave_liberada",
+            "investigacao_status",
+            "divulgacao_relatorio_publicado",
+            "ocorrencia_saida_pista",
+            "divulgacao_relatorio_numero"
+        ],
+        "columns_date": [
+            "ocorrencia_dia",
+            "divulgacao_dia_publicacao"
+        ]
+    },
+    "recomendacao": {
+        "columns_str": [
+            "recomendacao_conteudo",
+            "recomendacao_status",
+            "recomendacao_destinatario"
+        ],
+        "columns_date": [
+            "recomendacao_dia_assinatura",
+            "recomendacao_dia_encaminhamento",
+            "recomendacao_dia_feedback"
+        ]
+    }
+}
