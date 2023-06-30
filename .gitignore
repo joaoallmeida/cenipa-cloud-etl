@@ -160,5 +160,6 @@ cython_debug/
 #.idea/
 
 # Tests
-test*
-Test*
+# test*
+Test*.ipynb
+test*.ipynb

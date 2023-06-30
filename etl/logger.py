@@ -113,7 +113,7 @@ class Logger(object):
         self.logger.setLevel(logging.INFO)
         self.logger.addHandler(MongoHandler( self.host, self.port, self.database, self.collection, self.drop ))
 
-        self.logger.info('Init', extra=extra_fields(Step.START, Status.PROCESSING))
+        # self.logger.info('Init', extra=extra_fields(Step.START, Status.PROCESSING))
 
         return self.logger
     
