@@ -13,13 +13,12 @@ def lambda_handler(event,context):
 
     conf = configparser.ConfigParser()
     conf.read('config/credentials.ini')
-    mongodb_host = conf['MONGODB']['host']
 
     aws_session = boto3.Session(region_name='us-east-1')
     bucket = conf['AWS']['bucket']
     
     try:
-        logInstance = Logger( project_name='cenipa-etl', host=mongodb_host, drop=True )
+        logInstance = Logger( project_name='cenipa-etl', aws_session=aws_session )
         logger = logInstance.config()
 
         extInstance = Extract(logger_session=logger, aws_session=aws_session, bucket=bucket)

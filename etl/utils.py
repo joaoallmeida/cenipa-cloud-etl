@@ -25,3 +25,18 @@ class Utils:
             except Exception as e:
                 raise e
         return df
+    
+    @staticmethod
+    def get_changes(self,df,table,dbconn):
+
+        try:
+            
+            df_target = pl.read_database .read_sql_table(table, dbconn)
+            changes = df[~df.apply(tuple,axis=1).isin(df_target.apply(tuple,axis=1))]
+            insert = changes[~changes['id'].isin(df_target['id'])]
+            # modified = changes[changes['id'].isin(df_target['id'])]
+            
+        except Exception as e:
+            raise e
+        
+        return insert

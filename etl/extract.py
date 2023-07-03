@@ -1,6 +1,5 @@
 from .logger import Step, Status, extra_fields
 from datetime import datetime
-from typing import Generator
 import polars as pl
 import awswrangler as wr
 import traceback

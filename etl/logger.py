@@ -1,11 +1,11 @@
+import hashlib
 from logging import NOTSET, Handler, LogRecord
 from datetime import datetime
 import logging
 import enum
-import pymongo
 import socket
 import getpass
-
+import boto3
 
 class Status(enum.Enum):
     PROCESSING = 'P'
@@ -31,32 +31,56 @@ class Step(enum.Enum):
     UPLOAD = 'UPLOAD'
 
 
-def extra_fields(step:enum.Enum, status:enum.Enum, table:str='N/D', lines:int=0 ) -> dict:
-    data = {
-        "table_name": table,
-        "status": status.value,
-        "execution_step": step.value,
-        "num_affected_lines":lines,
-    }
+def extra_fields(step:enum.Enum, status:enum.Enum, table:str='N/D', lines:int=0, storage:str='dynamoDb') -> dict:
+    if storage != 'dynamoDb':
+        data = {
+            "table_name": table,
+            "status": status.value,
+            "execution_step": step.value,
+            "num_affected_lines":lines,
+        }
+    else:
+        data = {
+            "table_name": {"S":table},
+            "status": {"S":status.value},
+            "execution_step": {"S":step.value},
+            "num_affected_lines":{"N":str(lines)},
+        }
     return data
 
-class MongoHandler(Handler):
 
-    def __init__(self, host:str, port:int=27017, database:str='logdb', collection:str='log', drop:bool=False) -> None:
+class DynamoDbHandler(Handler):
+
+    def __init__(self, aws_session:boto3.Session, table_name:str, drop:bool=False) -> None:
 
         Handler.__init__(self)
-        self.conn = pymongo.MongoClient(host=host, port=port)
-        self.database = self.conn[database]
+        self.dynamo_client = aws_session.client('dynamodb')
+        waiter = self.dynamo_client.get_waiter('table_exists')
 
-        if collection in self.database.list_collection_names():
+        if table_name in self.dynamo_client.list_tables()['TableNames']:
             if drop:
-                self.database.drop_collection(collection)
-                self.collection = self.database.create_collection(collection)
+                self.dynamo_client.delete_table( TableName=table_name )
+                waiter.wait(TableName=table_name, WaiterConfig={'Delay':5, 'MaxAttempts': 5})
+
+                self.dynamo_client.create_table(
+                        TableName=table_name,
+                        KeySchema=[{'AttributeName': 'object_id', 'KeyType': 'HASH'}, {'AttributeName': 'timestamp', 'KeyType': 'RANGE'}],
+                        AttributeDefinitions=[{'AttributeName': 'object_id', 'AttributeType': 'S'}, {'AttributeName': 'timestamp', 'AttributeType': 'S'}],
+                        ProvisionedThroughput={'ReadCapacityUnits': 10, 'WriteCapacityUnits': 10}
+                )
+                self.table_name = table_name
             else:
-                self.collection = self.database[collection]
+                self.table_name = table_name
         else:
-            self.collection = self.database.create_collection(collection)
-    
+            self.dynamo_client.create_table(
+                    TableName=table_name,
+                    KeySchema=[{'AttributeName': 'object_id', 'KeyType': 'HASH'}, {'AttributeName': 'timestamp', 'KeyType': 'RANGE'}],
+                    AttributeDefinitions=[{'AttributeName': 'object_id', 'AttributeType': 'S'}, {'AttributeName': 'timestamp', 'AttributeType': 'S'}],
+                    ProvisionedThroughput={'ReadCapacityUnits': 10, 'WriteCapacityUnits': 10}
+            )
+            waiter.wait(TableName=table_name, WaiterConfig={'Delay':5, 'MaxAttempts': 5})
+            self.table_name = table_name
+
     def get_extra_fields(self, record):
         # The list contains all the attributes listed in
         # http://docs.python.org/library/logging.html#logrecord-attributes
@@ -82,39 +106,41 @@ class MongoHandler(Handler):
     
     def emit(self, record:LogRecord) -> None:
         message =  {
-                "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'),
-                "hostname": socket.gethostname(),
-                "host": socket.gethostbyname(socket.gethostname()),
-                "user": getpass.getuser(),
-                "level": record.levelno,
-                "level_name": record.levelname,
-                "message": record.getMessage(),
-                "process_name": record.name,
-                "file_name": record.filename,
-                "path_name": record.pathname
+                "object_id": {"S": hashlib.sha256(str(datetime.now().strftime('%H%M%S%f')).encode('ascii') ).hexdigest() },
+                "timestamp": { "S": datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f') },
+                "hostname": {"S": socket.gethostname()},
+                "host": {"S": socket.gethostbyname(socket.gethostname())},
+                "user": {"S": getpass.getuser()},
+                "level": {"N": str(record.levelno)},
+                "level_name": {"S": record.levelname},
+                "message": {"S": record.getMessage()},
+                "process_name": {"S": record.name},
+                "file_name": {"S": record.filename},
+                "path_name": {"S": record.pathname}
             }
         
         # Add extra fields
         message.update(self.get_extra_fields(record))
 
-        self.collection.insert_one( message )
-
+        try:
+            self.dynamo_client.put_item(
+                TableName=self.table_name,
+                Item=message
+            )
+        except Exception as e:
+            raise e
 
 class Logger(object):
 
-    def __init__(self, project_name:str, host:str, port:int=27017, database:str='logdb', collection:str='log', drop:bool=False) -> None:
+    def __init__(self, project_name:str, aws_session:boto3.Session, table_name:str=None, drop:bool=False) -> None:
         self.project_name = project_name
-        self.host = host
-        self.port = port
-        self.database = database
+        self.aws_session = aws_session
         self.drop = drop
-        self.logger = None
-        
-        self.collection = project_name if collection == 'log' else collection
+        self.table_name = project_name + "-log" if table_name is None else table_name + "-log"
         
     def config(self):
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s -> %(message)s')
         self.logger = logging.getLogger(self.project_name)
         self.logger.setLevel(logging.INFO)
-        self.logger.addHandler(MongoHandler( self.host, self.port, self.database, self.collection, self.drop ))
+        self.logger.addHandler(DynamoDbHandler( self.aws_session, self.table_name, self.drop ))
         return self.logger
