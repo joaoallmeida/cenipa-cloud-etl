@@ -31,11 +31,12 @@ load_event =  {
     "pipeline": [
         {
             "step": "load",
+            "date_ref": None,
             "tables": [
-                "aeronave",
-                "ocorrencia_tipo",
-                "ocorrencia",
-                "recomendacao"
+                "dim_aeronave",
+                "dim_ocorrencia_tipo",
+                "dim_recomendacao",
+                "fat_ocorrencia",
             ]
         }
     ]
@@ -60,6 +61,16 @@ event = {
                 "ocorrencia_tipo",
                 "ocorrencia",
                 "recomendacao"
+            ]
+        },
+        {
+            "step": "load",
+            "date_ref": None,
+            "tables": [
+                "dim_aeronave",
+                "dim_ocorrencia_tipo",
+                "dim_recomendacao",
+                "fat_ocorrencia"
             ]
         }
     ]

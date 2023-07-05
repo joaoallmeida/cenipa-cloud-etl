@@ -18,14 +18,22 @@
             "aeronave_tipo_operacao",
             "aeronave_nivel_dano"
         ],
-        "columns_date": []
+        "columns_date": [],
+        "columns_rename": {
+            "codigo_ocorrencia2": "codigo_ocorrencia"
+        },
+        "columns_drop": []
     },
     "ocorrencia_tipo": {
         "columns_str": [
             "ocorrencia_tipo",
             "ocorrencia_tipo_categoria"
         ],
-        "columns_date": []
+        "columns_date": [],
+        "columns_rename": {
+            "codigo_ocorrencia1": "codigo_ocorrencia"
+        },
+        "columns_drop": []
     },
     "ocorrencia": {
         "columns_str": [
@@ -36,11 +44,20 @@
             "investigacao_status",
             "divulgacao_relatorio_publicado",
             "ocorrencia_saida_pista",
-            "divulgacao_relatorio_numero"
+            "divulgacao_relatorio_numero",
+            "ocorrencia_aerodromo"
         ],
         "columns_date": [
             "ocorrencia_dia",
             "divulgacao_dia_publicacao"
+        ],
+        "columns_rename": {
+            "codigo_ocorrencia1": "codigo_ocorrencia_tipo",
+            "codigo_ocorrencia2": "codigo_ocorrencia_aeronave",
+            "codigo_ocorrencia4": "codigo_ocorrencia_recomendacao"
+        },
+        "columns_drop": [
+            "codigo_ocorrencia3"
         ]
     },
     "recomendacao": {
@@ -53,6 +70,10 @@
             "recomendacao_dia_assinatura",
             "recomendacao_dia_encaminhamento",
             "recomendacao_dia_feedback"
-        ]
+        ],
+        "columns_rename": {
+            "codigo_ocorrencia4": "codigo_ocorrencia"
+        },
+        "columns_drop": []
     }
 }

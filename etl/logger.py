@@ -6,6 +6,7 @@ import enum
 import socket
 import getpass
 import boto3
+import time
 
 class Status(enum.Enum):
     PROCESSING = 'P'
@@ -13,6 +14,7 @@ class Status(enum.Enum):
     FAILURE = 'F'
     ERROR = 'E'
     SUCCESSFULLY = 'S'
+    INITING = 'I'
 
 
 class Step(enum.Enum):
@@ -55,12 +57,11 @@ class DynamoDbHandler(Handler):
 
         Handler.__init__(self)
         self.dynamo_client = aws_session.client('dynamodb')
-        waiter = self.dynamo_client.get_waiter('table_exists')
 
         if table_name in self.dynamo_client.list_tables()['TableNames']:
             if drop:
                 self.dynamo_client.delete_table( TableName=table_name )
-                waiter.wait(TableName=table_name, WaiterConfig={'Delay':5, 'MaxAttempts': 5})
+                time.sleep(5) # wait 10 seconds for complete table deletion.
 
                 self.dynamo_client.create_table(
                         TableName=table_name,
@@ -68,6 +69,7 @@ class DynamoDbHandler(Handler):
                         AttributeDefinitions=[{'AttributeName': 'object_id', 'AttributeType': 'S'}, {'AttributeName': 'timestamp', 'AttributeType': 'S'}],
                         ProvisionedThroughput={'ReadCapacityUnits': 10, 'WriteCapacityUnits': 10}
                 )
+                time.sleep(10) # wait 10 seconds for complete table creation.
                 self.table_name = table_name
             else:
                 self.table_name = table_name
@@ -78,7 +80,7 @@ class DynamoDbHandler(Handler):
                     AttributeDefinitions=[{'AttributeName': 'object_id', 'AttributeType': 'S'}, {'AttributeName': 'timestamp', 'AttributeType': 'S'}],
                     ProvisionedThroughput={'ReadCapacityUnits': 10, 'WriteCapacityUnits': 10}
             )
-            waiter.wait(TableName=table_name, WaiterConfig={'Delay':5, 'MaxAttempts': 5})
+            time.sleep(10) # wait 10 seconds for complete table creation.
             self.table_name = table_name
 
     def get_extra_fields(self, record):

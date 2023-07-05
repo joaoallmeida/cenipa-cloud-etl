@@ -3,10 +3,11 @@ import json
 import boto3
 import traceback
 
-from etl.logger import Logger
+from etl.logger import Logger, extra_fields, Status, Step
 from etl.extract import Extract
 from etl.refined import Refined
-from tests.event import extract_event, refine_event, event
+from etl.load import Load
+from events.event import extract_event, refine_event, event, load_event
 
 
 def lambda_handler(event,context):
@@ -18,19 +19,26 @@ def lambda_handler(event,context):
     bucket = conf['AWS']['bucket']
     
     try:
-        logInstance = Logger( project_name='cenipa-etl', aws_session=aws_session )
+        logInstance = Logger( project_name='cenipa-etl', aws_session=aws_session, drop=True )
         logger = logInstance.config()
+
+        logger.info('Starting ETL', extra=extra_fields(Step.START, Status.INITING))
 
         extInstance = Extract(logger_session=logger, aws_session=aws_session, bucket=bucket)
         rfInstance = Refined(logger_session=logger, aws_session=aws_session, bucket=bucket)
+        ldInstance = Load(logger_session=logger, aws_session=aws_session, bucket=bucket)
 
         for pipe in event['pipeline']:
             if pipe['step'] == 'extract':
                 extInstance.get_raw_data( pipe['tables'] )
             elif pipe['step'] == 'refined':
                 rfInstance.refine_data( pipe['tables'], pipe['date_ref'] )
+            elif pipe['step'] == 'load':
+                ldInstance.load_starschema_model(pipe['tables'], pipe['date_ref'])
             else:
-                pass
+                logger.warning('Step not mapped')
+
+        logger.info('Finished ETL ', extra=extra_fields(Step.END, Status.COMPLETED))
 
     except Exception as e:
         logger.error(f'Pipeline failure: {traceback.format_exc()}')
@@ -50,4 +58,5 @@ def lambda_handler(event,context):
 
     # print(lambda_handler(extract_event,None))
     # print(lambda_handler(refine_event,None))
+    # print(lambda_handler(load_event,None))
     # print(lambda_handler(event,None))

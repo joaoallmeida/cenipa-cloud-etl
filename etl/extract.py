@@ -40,7 +40,7 @@ class Extract:
 
     def __upload_raw_data(self, df:pl.DataFrame, table_name:str) -> None:
 
-        dt_str = datetime.now().strftime('%Y%m%d%H')
+        dt_str = datetime.now().strftime('%Y%m%d')
         path = f"s3://{self.bucket}/raw/{table_name}/{table_name}_{dt_str}.parquet"
 
         self.logger.info(f'Uploading raw data to s3: {path}', extra=extra_fields(Step.UPLOAD, Status.PROCESSING, table_name))
