@@ -1,5 +1,8 @@
+from datetime import datetime, timedelta
 import polars as pl
 import awswrangler as wr
+import getpass
+import socket
 
 class Utils:
 
@@ -56,3 +59,17 @@ class Utils:
             
         except Exception as e:
             raise e
+    
+    
+    @staticmethod
+    def update_into_mysql(pk:str, df:pl.DataFrame, table_name:str, conn:any):
+        rows = df.to_dicts()
+        for data in rows:
+            sql01 = ",".join([f"{c} = '{data[c]}'" if isinstance(data[c], str) else f"{c} = {data[c]}" for c in df.columns if c != pk])
+            # sql01 = ",".join(f'{c} = %s' for c in df.columns if c != pk) 
+            update_statemant = f"UPDATE {table_name} SET {sql01}, atualizado_em='{datetime.now()}', atualizado_por='{getpass.getuser()}@{socket.gethostname()}' WHERE {pk} = {data[pk]}"
+
+            with conn.cursor() as cursor:
+                cursor.execute(update_statemant)
+            cursor.close()
+            conn.commit()

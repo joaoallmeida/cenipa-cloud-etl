@@ -19,7 +19,7 @@ def lambda_handler(event,context):
     bucket = conf['AWS']['bucket']
     
     try:
-        logInstance = Logger( project_name='cenipa-etl', aws_session=aws_session, drop=True )
+        logInstance = Logger( project_name='cenipa-etl', aws_session=aws_session , drop=False)
         logger = logInstance.config()
 
         logger.info('Starting ETL', extra=extra_fields(Step.START, Status.INITING))
@@ -34,7 +34,7 @@ def lambda_handler(event,context):
             elif pipe['step'] == 'refined':
                 rfInstance.refine_data( pipe['tables'], pipe['date_ref'] )
             elif pipe['step'] == 'load':
-                ldInstance.load_starschema_model(pipe['tables'], pipe['date_ref'])
+                ldInstance.load_starschema_model(tables=pipe['tables'], dt_ref=pipe['date_ref'], create_ddl=pipe['create_ddl'])
             else:
                 logger.warning('Step not mapped')
 

@@ -1,8 +1,10 @@
-from .logger import Step, Status, extra_fields
-from datetime import datetime
+import getpass
+import socket
 import polars as pl
 import awswrangler as wr
 import traceback
+from .logger import Step, Status, extra_fields
+from datetime import datetime
 
 class Extract:
 

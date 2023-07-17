@@ -30,6 +30,7 @@ class Step(enum.Enum):
     REFINE = 'REFINE'
     CREATE = 'CREATE'
     INSERT = 'INSERT'
+    UPDATE = 'UPDATE'
     UPLOAD = 'UPLOAD'
 
 
