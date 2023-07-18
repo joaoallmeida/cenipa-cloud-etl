@@ -33,6 +33,11 @@ jobs:
                 source venv/bin/activate
                 pip install -r requirements.txt
                 deactivate
+
                 cp -r venv/lib/python3.10/site-packages/. ./
                 zip -r "lambda_deploy.zip" . -x '*venv*'
+
+                pwd
+                ls -las
+                
                 aws lambda update-function-code --function-name==cenipa_etl --zip-file=fileb://lambda_deploy.zip
