@@ -1,0 +1,38 @@
+name: Deployment AWS Lambda Function
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+        
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v1
+              with:
+                aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                aws-secret-access-key: ${{ secrets.AWS_SECRETE_ACCESS_KEY }}
+                aws-region: us-east-1
+
+            - name: Set up Python
+              uses: actions/setup-python@v4
+              with:
+                python-version: 3.10
+
+            - name: Building Local Environment
+              run: |
+                mkdir venv
+                python -m pip install --upgrade pip setuptools wheel
+                python -m venv venv
+                source venv/bin/activate
+                pip install -r requirements.txt
+                deactivate
+                cp -r venv/lib/python3.10/site-packages/. ./
+                zip -r "lambda_deploy.zip" . -x '*venv*'
+                aws lambda update-function-code --function-name==cenipa_etl --zip-file=fileb://lambda_deploy.zip
