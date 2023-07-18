@@ -25,7 +25,8 @@ class Refined:
                 self.logger.info(f'Refining data -> {table}', extra=extra_fields(Step.REFINE,Status.PROCESSING, table))
                 
                 df = self.__read_raw_file(table, dt_ref)
-                df = Utils.str_cols(df, refined_event[table]['columns_str'])
+                df = Utils.str_cols(df, refined_event[table]['columns_str'], True)
+                df = Utils.str_cols(df, refined_event[table]['columns_str_special'])
                 df = Utils.str_datetime(df, refined_event[table]['columns_date'])
                 df = Utils.drop_cols(df, refined_event[table]['columns_drop'])
                 df = Utils.rename_cols(df, refined_event[table]['columns_rename'])

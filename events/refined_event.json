@@ -18,6 +18,7 @@
             "aeronave_tipo_operacao",
             "aeronave_nivel_dano"
         ],
+        "columns_str_special": [],
         "columns_date": [],
         "columns_rename": {
             "codigo_ocorrencia2": "codigo_ocorrencia"
@@ -29,6 +30,7 @@
             "ocorrencia_tipo",
             "ocorrencia_tipo_categoria"
         ],
+        "columns_str_special": [],
         "columns_date": [],
         "columns_rename": {
             "codigo_ocorrencia1": "codigo_ocorrencia"
@@ -46,6 +48,10 @@
             "ocorrencia_saida_pista",
             "divulgacao_relatorio_numero",
             "ocorrencia_aerodromo"
+        ],
+        "columns_str_special": [
+            "ocorrencia_longitude",
+            "ocorrencia_latitude"
         ],
         "columns_date": [
             "ocorrencia_dia",
@@ -66,13 +72,24 @@
             "recomendacao_status",
             "recomendacao_destinatario"
         ],
-        "columns_date": [
-            "recomendacao_dia_assinatura",
-            "recomendacao_dia_encaminhamento",
-            "recomendacao_dia_feedback"
-        ],
+        "columns_str_special": [],
+        "columns_date": [],
         "columns_rename": {
             "codigo_ocorrencia4": "codigo_ocorrencia"
+        },
+        "columns_drop": []
+    },
+    "fator_contribuinte": {
+        "columns_str": [
+            "fator_nome",
+            "fator_aspecto",
+            "fator_condicionante",
+            "fator_area"
+        ],
+        "columns_str_special": [],
+        "columns_date": [],
+        "columns_rename": {
+            "codigo_ocorrencia3": "codigo_ocorrencia"
         },
         "columns_drop": []
     }

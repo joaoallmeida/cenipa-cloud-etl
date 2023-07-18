@@ -6,7 +6,8 @@ extract_event = {
                 "aeronave",
                 "ocorrencia_tipo",
                 "ocorrencia",
-                "recomendacao"
+                "recomendacao",
+                "fator_contribuinte"
             ]
         }
     ]
@@ -21,7 +22,8 @@ refine_event = {
                 "aeronave",
                 "ocorrencia_tipo",
                 "ocorrencia",
-                "recomendacao"
+                "recomendacao",
+                "fator_contribuinte"
             ]
         }
     ]
@@ -32,10 +34,12 @@ load_event =  {
         {
             "step": "load",
             "date_ref": None,
+            "create_ddl": True,
             "tables": [
                 "dim_aeronave",
                 "dim_ocorrencia_tipo",
                 "dim_recomendacao",
+                "dim_fator_contribuinte",
                 "fat_ocorrencia",
             ]
         }
@@ -50,7 +54,8 @@ event = {
                 "aeronave",
                 "ocorrencia_tipo",
                 "ocorrencia",
-                "recomendacao"
+                "recomendacao",
+                "fator_contribuinte"
             ]
         },
         {
@@ -60,17 +65,20 @@ event = {
                 "aeronave",
                 "ocorrencia_tipo",
                 "ocorrencia",
-                "recomendacao"
+                "recomendacao",
+                "fator_contribuinte"
             ]
         },
         {
             "step": "load",
             "date_ref": None,
+            "create_ddl": True,
             "tables": [
                 "dim_aeronave",
                 "dim_ocorrencia_tipo",
                 "dim_recomendacao",
-                "fat_ocorrencia"
+                "dim_fator_contribuinte",
+                "fat_ocorrencia",
             ]
         }
     ]

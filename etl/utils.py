@@ -7,18 +7,26 @@ import socket
 class Utils:
 
     @staticmethod
-    def str_cols(df:pl.DataType, cols:list) -> pl.DataFrame:
-        for col in cols:
-            try:
-                df = df.with_columns(
-                    pl.col(col).str.replace(r"[***]",'Outros').str.to_titlecase()
-                )
-            except Exception as e:
-                raise e
-        return df
+    def str_cols(df:pl.DataFrame, cols:list, str_case:bool=False) -> pl.DataFrame:
+        try:
+            df = df.to_pandas()
+            for col in cols:
+                    if str_case:
+                        df[col] = df[col].str.replace(r"*",'Outros').str.title()
+                    else:
+                        df[col] = (df[col].str.replace(r'\t', '')
+                                        .str.replace(r'\\', '')
+                                        .str.replace(r'*', '')
+                                        .str.normalize('NFKD')
+                                        .str.encode('ascii', errors='ignore')
+                                        .str.decode('utf-8'))
+                    
+        except Exception as e:
+            raise e
+        return pl.from_pandas(df)
     
     @staticmethod
-    def str_datetime(df:pl.DataType, cols:list) -> pl.DataFrame:
+    def str_datetime(df:pl.DataFrame, cols:list) -> pl.DataFrame:
         for col in cols:
             try:
                 df = df.with_columns(
@@ -31,7 +39,7 @@ class Utils:
         return df
     
     @staticmethod
-    def drop_cols(df:pl.DataType, cols:list) -> pl.DataFrame:
+    def drop_cols(df:pl.DataFrame, cols:list) -> pl.DataFrame:
         try:
             df = df.drop(cols)
         except Exception as e:
@@ -39,7 +47,7 @@ class Utils:
         return df
 
     @staticmethod
-    def rename_cols(df:pl.DataType, cols:dict) -> pl.DataFrame:
+    def rename_cols(df:pl.DataFrame, cols:dict) -> pl.DataFrame:
         try:
             df = df.rename(cols)
         except Exception as e:

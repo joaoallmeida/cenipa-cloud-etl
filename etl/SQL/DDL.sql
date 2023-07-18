@@ -1,11 +1,12 @@
 CREATE DATABASE IF NOT EXISTS `dw` /*!40100 DEFAULT CHARACTER SET latin1 */;
 
 
-DROP TABLE IF EXISTS dim_aeronave;
-DROP TABLE IF EXISTS dim_ocorrencia;
-DROP TABLE IF EXISTS dim_ocorrencia_tipo;
-DROP TABLE IF EXISTS dim_recomendacao;
-DROP TABLE IF EXISTS fat_ocorrencia;
+-- DROP TABLE IF EXISTS dim_aeronave;
+-- DROP TABLE IF EXISTS dim_ocorrencia;
+-- DROP TABLE IF EXISTS dim_ocorrencia_tipo;
+-- DROP TABLE IF EXISTS dim_recomendacao;
+-- DROP TABLE IF EXISTS dim_fator_contribuinte;
+-- DROP TABLE IF EXISTS fat_ocorrencia;
 
 -- dw.fat_ocorrencia definition
 
@@ -68,13 +69,14 @@ CREATE TABLE IF NOT EXISTS `dw`.`dim_ocorrencia_tipo` (
   `atualizado_por` varchar(255)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- dw.dim_ocorrencia definition
+-- dw.dim_fator_contribuinte definition
 
-CREATE TABLE IF NOT EXISTS `dw`.`dim_ocorrencia` (
+CREATE TABLE IF NOT EXISTS `dw`.`dim_fator_contribuinte` (
   `codigo_ocorrencia` bigint(20) DEFAULT NULL,
-  `ocorrencia_tipo` varchar(255),
-  `ocorrencia_tipo_categoria` varchar(255),
-  `taxonomia_tipo_icao` varchar(255),
+  `fator_nome` varchar(255),
+  `fator_aspecto` varchar(255),
+  `fator_condicionante` varchar(255),
+  `fator_area` varchar(255),
   `criado_em` datetime DEFAULT NULL,
   `criado_por` varchar(255),
   `atualizado_em` datetime DEFAULT NULL,
