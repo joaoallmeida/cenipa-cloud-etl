@@ -39,4 +39,4 @@ jobs:
                 pwd
                 ls -las
 
-                aws lambda update-function-code --function-name==cenipa_etl --zip-file=fileb://lambda_deploy.zip
+                aws lambda update-function-code --function-name=cenipa_etl --zip-file=fileb://lambda_deploy.zip
