@@ -39,7 +39,7 @@ create_function() {
         --role arn:aws:iam::400582553708:role/service-role/cenipa-etl-role-o11blh01 \
         --timeout 600 \
         --memory-size 512 \
-        --vpc-config "{"SubnetIds": ["subnet-094736222d17ac479", "subnet-0b2b1239195367b1a"], "SecurityGroupIds": ["sg-0ebd6e8c7c844104d"]}" \
+        --vpc-config '{"SubnetIds": ["subnet-094736222d17ac479", "subnet-0b2b1239195367b1a"], "SecurityGroupIds": ["sg-0ebd6e8c7c844104d"]}' \
         --environment Variables="{s3_bucket=$s3_bucket}" \
         --zip-file=fileb://lambda_deploy.zip \
         --region "$aws_region"
