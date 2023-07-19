@@ -44,7 +44,17 @@ jobs:
 
                 if [ ${#function_check} -gt 0 ]
                 then
-                    aws lambda update-function-code --function-name=cenipa-etl --zip-file=fileb://lambda_deploy.zip
+                    echo "Updating Lambda Cenipa-ETL"
+                    aws lambda update-function-code --function-name=cenipa_etl --zip-file=fileb://lambda_deploy.zip
                 else
-                    echo "This Lambda doent's exists"
+                    echo "Creating Lambda Cenipa-ETL"
+                    aws lambda create-function --function-name cenipa-etl \
+                    --runtime python3.10 \
+                    --handler lambda_fuction.lambda_handler \
+                    --role arn:aws:iam::400582553708:role/service-role/cenipa-etl-role-o11blh01 \
+                    --timeout 600 \
+                    --memory-size 512 \
+                    --vpc-config { "SubnetIds": ["subnet-094736222d17ac479","subnet-0b2b1239195367b1a"], "SecurityGroupIds": ["sg-0ebd6e8c7c844104d"] } \
+                    --environment  Variables={s3_bucket=cenipa.etl.com.br} \
+                    --zip-file=fileb://lambda_deploy.zip
                 fi

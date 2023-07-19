@@ -2,6 +2,7 @@ import configparser
 import json
 import boto3
 import traceback
+import os
 
 from etl.logger import Logger, extra_fields, Status, Step
 from etl.extract import Extract
@@ -12,11 +13,8 @@ from events.event import extract_event, refine_event, event, load_event
 
 def lambda_handler(event,context):
 
-    conf = configparser.ConfigParser()
-    conf.read('config/credentials.ini')
-
     aws_session = boto3.Session(region_name='us-east-1')
-    bucket = conf['AWS']['bucket']
+    bucket = os.environ['s3_bucket']
     
     try:
         logInstance = Logger( project_name='cenipa-etl', aws_session=aws_session , drop=False)
