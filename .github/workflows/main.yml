@@ -38,5 +38,12 @@ jobs:
 
                 pwd
                 ls -las
+                
+                function_check=$(aws lambda get-function --function-name=cenipa-etl --region=us-east-1)
 
-                aws lambda update-function-code --function-name=cenipa_etl --zip-file=fileb://lambda_deploy.zip
+                if [ ${#function_check} -gt 0 ]
+                then
+                    aws lambda update-function-code --function-name=cenipa-etl --zip-file=fileb://lambda_deploy.zip
+                else
+                    echo "This Lambda doent's exists"
+                fi
