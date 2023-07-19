@@ -40,10 +40,7 @@ def lambda_handler(event,context):
 
     except Exception as e:
         logger.error(f'Pipeline failure: {traceback.format_exc()}')
-        raise {
-            "statusCode": 400,
-            "message": traceback.format_exc()
-        }
+        raise e
     
     else:
         return {
