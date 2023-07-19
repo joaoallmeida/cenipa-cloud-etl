@@ -35,7 +35,7 @@ jobs:
                 deactivate
 
                 cp -r venv/lib/python3.10/site-packages/. ./
-                zip -r "lambda_deploy.zip" . -x '*venv*' '*.git*'
+                zip -r -9 "lambda_deploy.zip" . -x '*venv*' '*.git*' '*config*'
 
                 pwd
                 ls -las
