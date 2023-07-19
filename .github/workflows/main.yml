@@ -45,7 +45,7 @@ jobs:
                 if [ ${#function_check} -gt 0 ]
                 then
                     echo "Updating Lambda Cenipa-ETL"
-                    aws lambda update-function-code --function-name=cenipa_etl --zip-file=fileb://lambda_deploy.zip
+                    aws lambda update-function-code --function-name=cenipa-etl --zip-file=fileb://lambda_deploy.zip
                 else
                     echo "Creating Lambda Cenipa-ETL"
                     aws lambda create-function --function-name cenipa-etl \
