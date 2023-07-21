@@ -1,4 +1,3 @@
-import configparser
 import json
 import boto3
 import traceback
