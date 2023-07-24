@@ -1,4 +1,5 @@
 awswrangler==3.2.1
 connectorx==0.3.1
 polars==0.18.4
-# SQLAlchemy==2.0.17
+PyMySQL==1.1.0
+SQLAlchemy==2.0.17
