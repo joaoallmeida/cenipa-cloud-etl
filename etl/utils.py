@@ -7,6 +7,18 @@ import socket
 class Utils:
 
     @staticmethod
+    def get_glue_connection(aws_session:any, conn_name:str) -> str:
+        try:
+            glue = aws_session.client('glue')
+            connection = glue.get_connection(Name=conn_name)['Connection']['ConnectionProperties']
+
+            host = connection['JDBC_CONNECTION_URL'].split('/')[1]
+            uri = f"mysql://{connection['USERNAME']}:{connection['PASSWORD']}@{host}/dw"
+        except Exception as e:
+            raise e
+        return uri
+
+    @staticmethod
     def str_cols(df:pl.DataFrame, cols:list, str_case:bool=False) -> pl.DataFrame:
         try:
             df = df.to_pandas()

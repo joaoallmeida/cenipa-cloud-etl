@@ -8,7 +8,6 @@ import socket
 import polars as pl
 import awswrangler as wr
 import traceback
-import configparser
 import pymysql
 
 class Load:
@@ -18,22 +17,15 @@ class Load:
         self.aws_session = aws_session
         self.bucket = bucket
 
-        pymysql.install_as_MySQLdb()
-        config = configparser.ConfigParser()
-        config.read('config/credentials.ini')
+        self.conn = wr.mysql.connect('rds_mysql', boto3_session=self.aws_session)
+        self.uri = Utils.get_glue_connection(self.aws_session, 'rds_mysql')
 
-        self.uri = config['AWS']['uri']
-        host = config['MYSQL']['host']
-        user = config['MYSQL']['user']
-        password = config['MYSQL']['password']
-        
-        # self.conn = wr.mysql.connect('rds_aurora_mysql', dbname='dw', boto3_session=self.aws_session)
-        self.conn = pymysql.connect(host=host, user=user, password=password, database='dw')
-    
+        pymysql.install_as_MySQLdb()
+
     def check_new_rows_and_changes(self, source:pl.DataFrame, table_name:str, dt_ref:str=None):
 
-        dt_str = (datetime.now() - timedelta(1)).strftime('%Y%m%d') if dt_ref is None else dt_ref
-        # s3_path = f"s3://cenipa.etl.com.br/refined/{table_name}/{table_name}_{dt_str}.parquet"
+        # dt_str = (datetime.now() - timedelta(1)).strftime('%Y%m%d') if dt_ref is None else dt_ref
+        # s3_path = f"s3://{self.bucket}/refined/{table_name}/{table_name}_{dt_str}.parquet"
 
         self.logger.info(f'Reading table target: {table_name}.', extra=extra_fields(Step.READ, Status.PROCESSING, table=table_name))
 
@@ -97,7 +89,7 @@ class Load:
         self.logger.info('Creating Dim Aeronave.',  extra=extra_fields(Step.CREATE, Status.PROCESSING, table='Dim Aeronave'))
 
         dt_str = datetime.now().strftime('%Y%m%d') if dt_ref is None else dt_ref
-        path_aeronave = f"s3://cenipa.etl.com.br/refined/aeronave/aeronave_{dt_str}.parquet"
+        path_aeronave = f"s3://{self.bucket}/refined/aeronave/aeronave_{dt_str}.parquet"
 
         dim_aeronave_df = pl.from_pandas(wr.s3.read_parquet( path=path_aeronave, boto3_session=self.aws_session ))
         self.check_new_rows_and_changes(dim_aeronave_df, 'dim_aeronave', dt_ref)
@@ -108,7 +100,7 @@ class Load:
         self.logger.info('Creating Dim Ocorrencia Tipo.',  extra=extra_fields(Step.CREATE, Status.PROCESSING, table='Dim Aeronave'))
         
         dt_str = datetime.now().strftime('%Y%m%d') if dt_ref is None else dt_ref
-        path_ocorrencia_tipo = f"s3://cenipa.etl.com.br/refined/ocorrencia_tipo/ocorrencia_tipo_{dt_str}.parquet"
+        path_ocorrencia_tipo = f"s3://{self.bucket}/refined/ocorrencia_tipo/ocorrencia_tipo_{dt_str}.parquet"
 
         dim_ocorrencia_tipo_df = pl.from_pandas(wr.s3.read_parquet( path=path_ocorrencia_tipo, boto3_session=self.aws_session ))      
         self.check_new_rows_and_changes(dim_ocorrencia_tipo_df, 'dim_ocorrencia_tipo', dt_ref)
@@ -120,7 +112,7 @@ class Load:
         self.logger.info('Creating Dim Recomendacao.',  extra=extra_fields(Step.CREATE, Status.PROCESSING, table='Dim Recomendacao'))
         
         dt_str = datetime.now().strftime('%Y%m%d') if dt_ref is None else dt_ref
-        path_recomendacao = f"s3://cenipa.etl.com.br/refined/recomendacao/recomendacao_{dt_str}.parquet"
+        path_recomendacao = f"s3://{self.bucket}/refined/recomendacao/recomendacao_{dt_str}.parquet"
 
         dim_recomendacao_df = pl.from_pandas(wr.s3.read_parquet( path=path_recomendacao, boto3_session=self.aws_session ))
         self.check_new_rows_and_changes(dim_recomendacao_df, 'dim_recomendacao', dt_ref)
@@ -132,7 +124,7 @@ class Load:
         self.logger.info('Creating Dim Fator Contribuinte.',  extra=extra_fields(Step.CREATE, Status.PROCESSING, table='Dim Fator Contribuinte'))
         
         dt_str = datetime.now().strftime('%Y%m%d') if dt_ref is None else dt_ref
-        path_fator_contribuinte = f"s3://cenipa.etl.com.br/refined/fator_contribuinte/fator_contribuinte_{dt_str}.parquet"
+        path_fator_contribuinte = f"s3://{self.bucket}/refined/fator_contribuinte/fator_contribuinte_{dt_str}.parquet"
 
         dim_fator_contribuinte_df = pl.from_pandas(wr.s3.read_parquet( path=path_fator_contribuinte, boto3_session=self.aws_session ))
         self.check_new_rows_and_changes(dim_fator_contribuinte_df, 'dim_fator_contribuinte', dt_ref)
@@ -144,7 +136,7 @@ class Load:
         self.logger.info('Creating Fat Ocorrencia.',  extra=extra_fields(Step.CREATE, Status.PROCESSING, table='Fat Ocorrencia'))
         
         dt_str = datetime.now().strftime('%Y%m%d') if dt_ref is None else dt_ref
-        path_ocorrencia = f"s3://cenipa.etl.com.br/refined/ocorrencia/ocorrencia_{dt_str}.parquet"
+        path_ocorrencia = f"s3://{self.bucket}/refined/ocorrencia/ocorrencia_{dt_str}.parquet"
 
         fat_ocorrencia_df = pl.from_pandas(wr.s3.read_parquet( path=path_ocorrencia, boto3_session=self.aws_session ))   
         self.check_new_rows_and_changes(fat_ocorrencia_df, 'fat_ocorrencia', dt_ref)

@@ -60,29 +60,9 @@ class DynamoDbHandler(Handler):
         self.dynamo_client = aws_session.client('dynamodb')
 
         if table_name in self.dynamo_client.list_tables()['TableNames']:
-            if drop:
-                self.dynamo_client.delete_table( TableName=table_name )
-                time.sleep(5) # wait 10 seconds for complete table deletion.
-
-                self.dynamo_client.create_table(
-                        TableName=table_name,
-                        KeySchema=[{'AttributeName': 'object_id', 'KeyType': 'HASH'}, {'AttributeName': 'timestamp', 'KeyType': 'RANGE'}],
-                        AttributeDefinitions=[{'AttributeName': 'object_id', 'AttributeType': 'S'}, {'AttributeName': 'timestamp', 'AttributeType': 'S'}],
-                        ProvisionedThroughput={'ReadCapacityUnits': 10, 'WriteCapacityUnits': 10}
-                )
-                time.sleep(10) # wait 10 seconds for complete table creation.
-                self.table_name = table_name
-            else:
-                self.table_name = table_name
-        else:
-            self.dynamo_client.create_table(
-                    TableName=table_name,
-                    KeySchema=[{'AttributeName': 'object_id', 'KeyType': 'HASH'}, {'AttributeName': 'timestamp', 'KeyType': 'RANGE'}],
-                    AttributeDefinitions=[{'AttributeName': 'object_id', 'AttributeType': 'S'}, {'AttributeName': 'timestamp', 'AttributeType': 'S'}],
-                    ProvisionedThroughput={'ReadCapacityUnits': 10, 'WriteCapacityUnits': 10}
-            )
-            time.sleep(10) # wait 10 seconds for complete table creation.
             self.table_name = table_name
+        else:
+            raise ValueError(f'Table {table_name} not found!')
 
     def get_extra_fields(self, record):
         # The list contains all the attributes listed in
