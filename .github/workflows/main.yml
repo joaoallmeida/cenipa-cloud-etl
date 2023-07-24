@@ -28,7 +28,7 @@ jobs:
               env:
                 REGISTRY: ${{ steps.login-ecr.outputs.registry }}
                 REPOSITORY: cenipa-etl
-                IMAGE_TAG: ${{ github.sha }}
+                IMAGE_TAG: latest
               run: |
                 docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
                 docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG

@@ -30,7 +30,7 @@ update_function() {
     echo "Updating Lambda $function_name"
     aws lambda update-function-code \
     --function-name "$function_name" \ 
-    --code ImageUri=336392948345.dkr.ecr.us-east-1.amazonaws.com/cenipa-etl:latest \
+    --image-uri 400582553708.dkr.ecr.us-east-1.amazonaws.com/cenipa-etl \
     --region "$aws_region"
     # --zip-file=fileb://lambda_deploy.zip \
 }
@@ -47,7 +47,7 @@ create_function() {
         --vpc-config '{"SubnetIds": ["subnet-094736222d17ac479", "subnet-0b2b1239195367b1a"], "SecurityGroupIds": ["sg-0ebd6e8c7c844104d"]}' \
         --environment Variables="{s3_bucket=$s3_bucket}" \
         --layers arn:aws:lambda:us-east-1:336392948345:layer:AWSSDKPandas-Python310:3 \
-        --code ImageUri=336392948345.dkr.ecr.us-east-1.amazonaws.com/cenipa-etl:latest \
+        --code ImageUri=400582553708.dkr.ecr.us-east-1.amazonaws.com/cenipa-etl \
         --region "$aws_region"
         # --zip-file=fileb://lambda_deploy.zip \
 }
