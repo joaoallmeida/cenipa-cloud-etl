@@ -9,6 +9,10 @@ terraform {
 
 provider "aws" {
   region  = "us-east-1"
+  default_tags {
+    Environment = "Dev"
+    Name = "ETL-Cenipa"
+  }
 }
 
 resource "aws_db_instance" "dwinstance" {
@@ -24,10 +28,6 @@ resource "aws_db_instance" "dwinstance" {
   skip_final_snapshot  = true
   publicly_accessible  = true
 
-  tags = {
-    Name = "DW Instance"
-    Environment = "dev"
-  }
 }
 
 resource "aws_glue_connection" "rds_mysql_conn" {
@@ -42,10 +42,6 @@ resource "aws_glue_connection" "rds_mysql_conn" {
 resource "aws_s3_bucket" "cenipa-bucket" {
   bucket = "cenipa.etl.com.br"
 
-  tags = {
-    Name        = "My bucket"
-    Environment = "dev"
-  }
 }
 
 resource "aws_dynamodb_table" "cenipa-etl-log" {
@@ -71,8 +67,13 @@ resource "aws_dynamodb_table" "cenipa-etl-log" {
   #   enabled        = false
   # }
 
-  tags = {
-    Name        = "dynamodb-table-1"
-    Environment = "dev"
+}
+
+resource "aws_ecr_repository" "cenipa-etl" {
+  name                 = "cenipa-etl"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
   }
 }
