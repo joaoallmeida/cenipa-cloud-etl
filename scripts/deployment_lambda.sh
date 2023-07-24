@@ -45,9 +45,9 @@ create_function() {
         --memory-size 512 \
         --vpc-config '{"SubnetIds": ["subnet-094736222d17ac479", "subnet-0b2b1239195367b1a"], "SecurityGroupIds": ["sg-0ebd6e8c7c844104d"]}' \
         --environment Variables="{s3_bucket=$s3_bucket}" \
-        --layers arn:aws:lambda:us-east-1:336392948345:layer:AWSSDKPandas-Python310:3 \
         --code ImageUri=400582553708.dkr.ecr.us-east-1.amazonaws.com/cenipa-etl:latest \
         --region "$aws_region"
+        # --layers arn:aws:lambda:us-east-1:336392948345:layer:AWSSDKPandas-Python310:3 \
         # --runtime python3.10 \
         # --handler lambda_function.lambda_handler \
         # --zip-file=fileb://lambda_deploy.zip \
