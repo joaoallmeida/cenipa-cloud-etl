@@ -39,8 +39,7 @@ create_function() {
     echo "Creating Lambda $function_name"
     aws lambda create-function \
         --function-name "$function_name" \
-        --runtime python3.10 \
-        --handler lambda_function.lambda_handler \
+        --package-type Image \
         --role arn:aws:iam::400582553708:role/service-role/cenipa-etl-role-o11blh01 \
         --timeout 600 \
         --memory-size 512 \
@@ -49,6 +48,8 @@ create_function() {
         --layers arn:aws:lambda:us-east-1:336392948345:layer:AWSSDKPandas-Python310:3 \
         --code ImageUri=400582553708.dkr.ecr.us-east-1.amazonaws.com/cenipa-etl:latest \
         --region "$aws_region"
+        # --runtime python3.10 \
+        # --handler lambda_function.lambda_handler \
         # --zip-file=fileb://lambda_deploy.zip \
 }
 
