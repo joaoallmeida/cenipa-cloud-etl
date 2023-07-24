@@ -4,9 +4,9 @@ FROM public.ecr.aws/lambda/python:3.10
 COPY requirements.txt .
 
 # Copy function code
-COPY etl .
-COPY data .
-COPY events .
+COPY etl ./etl
+COPY data ./data
+COPY events ./events
 COPY lambda_function.py .
 
 # Install the specified packages
