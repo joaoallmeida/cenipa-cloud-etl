@@ -1,5 +1,3 @@
-import getpass
-import socket
 import polars as pl
 import awswrangler as wr
 import traceback
