@@ -14,7 +14,7 @@ deactivate
 
 # Creating Zip File
 cp -r venv/lib/python3.10/site-packages/. ./
-zip -r -9 "lambda_deploy.zip" . -x '*venv*' '*.git*'
+zip -r -9 "lambda_deploy.zip" . -x '*venv*' '*.git*' '*infra*'
 
 # Print local folder and contents
 pwd
