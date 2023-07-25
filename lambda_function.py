@@ -9,7 +9,6 @@ from etl.refined import Refined
 from etl.load import Load
 # from events.event import extract_event, refine_event, event, load_event
 
-print('Loading function')
 
 def lambda_handler(event,context):
 

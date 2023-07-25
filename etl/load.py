@@ -84,64 +84,24 @@ class Load:
         
         self.logger.info('Completed DDL DW Tables', extra=extra_fields(Step.CREATE, Status.COMPLETED))
         
-    def create_dim_aeronave(self, dt_ref:str=None):
 
-        self.logger.info('Creating Dim Aeronave.',  extra=extra_fields(Step.CREATE, Status.PROCESSING, table='Dim Aeronave'))
+    def create_starschema(self, table_name:str, dt_ref:str=None):
 
-        dt_str = datetime.now().strftime('%Y%m%d') if dt_ref is None else dt_ref
-        path_aeronave = f"s3://{self.bucket}/refined/aeronave/aeronave_{dt_str}.parquet"
+        self.logger.info(f'Creating {table_name.title()}.',  extra=extra_fields(Step.CREATE, Status.PROCESSING, table_name.title()))
 
-        dim_aeronave_df = pl.from_pandas(wr.s3.read_parquet( path=path_aeronave, boto3_session=self.aws_session ))
-        self.check_new_rows_and_changes(dim_aeronave_df, 'dim_aeronave', dt_ref)
+        try:
+            
+            dt_str = datetime.now().strftime('%Y%m%d') if dt_ref is None else dt_ref
+            folder_s3 = f"s3://{self.bucket}/refined/{table_name[4:]}/{table_name[4:]}_{dt_str}.parquet"
 
-        self.logger.info('Complete creation table Dim Aeronave.', extra=extra_fields(Step.CREATE, Status.COMPLETED, table='Dim Aeronave'))
+            df = pl.from_pandas(wr.s3.read_parquet( path=folder_s3, boto3_session=self.aws_session ))   
+            self.check_new_rows_and_changes(df, table_name, dt_ref)
 
-    def create_dim_ocorrencia_tipo(self, dt_ref:str=None):
-        self.logger.info('Creating Dim Ocorrencia Tipo.',  extra=extra_fields(Step.CREATE, Status.PROCESSING, table='Dim Aeronave'))
-        
-        dt_str = datetime.now().strftime('%Y%m%d') if dt_ref is None else dt_ref
-        path_ocorrencia_tipo = f"s3://{self.bucket}/refined/ocorrencia_tipo/ocorrencia_tipo_{dt_str}.parquet"
+            self.logger.info(f'Complete creation table {table_name.title()}.', extra=extra_fields(Step.CREATE, Status.COMPLETED, table_name.title(), len(df.rows())))
 
-        dim_ocorrencia_tipo_df = pl.from_pandas(wr.s3.read_parquet( path=path_ocorrencia_tipo, boto3_session=self.aws_session ))      
-        self.check_new_rows_and_changes(dim_ocorrencia_tipo_df, 'dim_ocorrencia_tipo', dt_ref)
-
-        self.logger.info('Complete creation table Dim Ocorrencia Tipo.', extra=extra_fields(Step.CREATE, Status.COMPLETED, table='Dim Ocorrencia Tipo'))
-
-    def create_dim_recomendacao(self, dt_ref:str=None):
-
-        self.logger.info('Creating Dim Recomendacao.',  extra=extra_fields(Step.CREATE, Status.PROCESSING, table='Dim Recomendacao'))
-        
-        dt_str = datetime.now().strftime('%Y%m%d') if dt_ref is None else dt_ref
-        path_recomendacao = f"s3://{self.bucket}/refined/recomendacao/recomendacao_{dt_str}.parquet"
-
-        dim_recomendacao_df = pl.from_pandas(wr.s3.read_parquet( path=path_recomendacao, boto3_session=self.aws_session ))
-        self.check_new_rows_and_changes(dim_recomendacao_df, 'dim_recomendacao', dt_ref)
-
-        self.logger.info('Complete creation table Dim Recomendacao.', extra=extra_fields(Step.CREATE, Status.COMPLETED, table='Dim Recomendacao'))
-
-    def create_dim_fator_contribuinte(self, dt_ref:str=None):
-
-        self.logger.info('Creating Dim Fator Contribuinte.',  extra=extra_fields(Step.CREATE, Status.PROCESSING, table='Dim Fator Contribuinte'))
-        
-        dt_str = datetime.now().strftime('%Y%m%d') if dt_ref is None else dt_ref
-        path_fator_contribuinte = f"s3://{self.bucket}/refined/fator_contribuinte/fator_contribuinte_{dt_str}.parquet"
-
-        dim_fator_contribuinte_df = pl.from_pandas(wr.s3.read_parquet( path=path_fator_contribuinte, boto3_session=self.aws_session ))
-        self.check_new_rows_and_changes(dim_fator_contribuinte_df, 'dim_fator_contribuinte', dt_ref)
-
-        self.logger.info('Complete creation table Dim Fator Contribuinte.', extra=extra_fields(Step.CREATE, Status.COMPLETED, table='Dim Fator Contribuinte'))
-
-    def create_fat_ocorrencia(self, dt_ref:str=None):
-        
-        self.logger.info('Creating Fat Ocorrencia.',  extra=extra_fields(Step.CREATE, Status.PROCESSING, table='Fat Ocorrencia'))
-        
-        dt_str = datetime.now().strftime('%Y%m%d') if dt_ref is None else dt_ref
-        path_ocorrencia = f"s3://{self.bucket}/refined/ocorrencia/ocorrencia_{dt_str}.parquet"
-
-        fat_ocorrencia_df = pl.from_pandas(wr.s3.read_parquet( path=path_ocorrencia, boto3_session=self.aws_session ))   
-        self.check_new_rows_and_changes(fat_ocorrencia_df, 'fat_ocorrencia', dt_ref)
-
-        self.logger.info('Complete creation table Fat Ocorrencia.', extra=extra_fields(Step.CREATE, Status.COMPLETED, table='Fat Ocorrencia'))
+        except Exception as e:
+            self.logger.error(f'Erro to create table {table_name} into MySQL: {e}', extra=extra_fields(Step.CREATE, Status.FAILURE, table_name.title()))
+            raise e
 
     def load_starschema_model(self, tables:list, dt_ref:str=None, create_ddl:bool=False):
 
@@ -151,18 +111,6 @@ class Load:
             self.create_ddl()
 
         for table in tables:
-
-            if table == 'fat_ocorrencia':
-                self.create_fat_ocorrencia(dt_ref)
-            elif table == 'dim_ocorrencia_tipo':
-                self.create_dim_ocorrencia_tipo(dt_ref)
-            elif table == 'dim_aeronave':
-                self.create_dim_aeronave(dt_ref)
-            elif table == 'dim_recomendacao':
-                self.create_dim_recomendacao(dt_ref)
-            elif table == 'dim_fator_contribuinte':
-                self.create_dim_fator_contribuinte(dt_ref) 
-            else:
-                self.logger.warning(f'Not fount table: {table}', extra=extra_fields(Step.CREATE, Status.ERROR))
+            self.create_starschema(table, dt_ref)
 
         self.logger.info("Complete Load Data.", extra=extra_fields(Step.LOAD_END, Status.COMPLETED))

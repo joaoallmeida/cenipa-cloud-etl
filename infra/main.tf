@@ -29,7 +29,6 @@ resource "aws_db_instance" "dwinstance" {
   parameter_group_name = "default.mysql8.0"
   skip_final_snapshot  = true
   publicly_accessible  = true
-
 }
 
 resource "aws_glue_connection" "rds_mysql_conn" {
@@ -42,8 +41,16 @@ resource "aws_glue_connection" "rds_mysql_conn" {
 }
 
 resource "aws_s3_bucket" "cenipa-bucket" {
-  bucket = "cenipa.etl.com.br"
+  bucket        = "cenipa.etl.com.br"
+  force_destroy = true 
+}
 
+resource "aws_s3_object" "object" {
+  for_each = fileset("../data/", "**")
+  bucket = aws_s3_bucket.cenipa-bucket.id
+  key = "source/${each.value}"
+  source = "../data/${each.value}"
+  etag = filemd5("../data/${each.value}")
 }
 
 resource "aws_dynamodb_table" "cenipa-etl-log" {
@@ -63,12 +70,12 @@ resource "aws_dynamodb_table" "cenipa-etl-log" {
     name = "timestamp"
     type = "S"
   }
-
 }
 
 resource "aws_ecr_repository" "cenipa-etl" {
   name                 = "cenipa-etl"
   image_tag_mutability = "MUTABLE"
+  force_delete         = true
 
   image_scanning_configuration {
     scan_on_push = true

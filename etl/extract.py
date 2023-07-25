@@ -17,7 +17,8 @@ class Extract:
         for table in tables:
             self.logger.info(f'Capturing data from table -> {table}', extra=extra_fields(Step.READ,Status.PROCESSING, table))
             try:
-                df = self.read_csv_with_encoding(f'data/{table}.csv', ['utf-8', 'latin-1'])
+                # df = self.read_csv_with_encoding(f'data/{table}.csv', ['utf-8', 'latin-1'])
+                df = self.read_csv_with_encoding(f's3://cenipa.etl.com.br/source/{table}.csv', ['utf-8', 'latin-1'])
                 self.logger.info(f'Complete data capture from table -> {table}', extra=extra_fields(Step.READ,Status.COMPLETED, table, len(df.rows())))
                 self.__upload_raw_data(df, table)
             except Exception as e:
@@ -29,7 +30,8 @@ class Extract:
     def read_csv_with_encoding(self, file_path: str, encodings: list):
         for encoding in encodings:
             try:
-                df = pl.read_csv(file_path, encoding=encoding, separator=';', ignore_errors=True)
+                # df = pl.read_csv(file_path, encoding=encoding, separator=';', ignore_errors=True)
+                df = pl.from_pandas(wr.s3.read_csv(file_path, encoding=encoding, sep=';', boto3_session=self.awsSession))
                 return df
             except UnicodeDecodeError:
                 pass
