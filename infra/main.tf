@@ -64,11 +64,6 @@ resource "aws_dynamodb_table" "cenipa-etl-log" {
     type = "S"
   }
 
-  # ttl {
-  #   attribute_name = "TimeToExist"
-  #   enabled        = false
-  # }
-
 }
 
 resource "aws_ecr_repository" "cenipa-etl" {

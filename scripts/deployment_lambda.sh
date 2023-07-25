@@ -28,8 +28,9 @@ function_exists() {
 
 update_function() {
     echo "Updating Lambda $function_name"
+    
     aws lambda update-function-code \
-    --function-name "$function_name" \ 
+    --function-name "$function_name" \
     --image-uri 400582553708.dkr.ecr.us-east-1.amazonaws.com/cenipa-etl:latest \
     --region "$aws_region"
     # --zip-file=fileb://lambda_deploy.zip \

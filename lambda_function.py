@@ -7,8 +7,9 @@ from etl.logger import Logger, extra_fields, Status, Step
 from etl.extract import Extract
 from etl.refined import Refined
 from etl.load import Load
-from events.event import extract_event, refine_event, event, load_event
+# from events.event import extract_event, refine_event, event, load_event
 
+print('Loading function')
 
 def lambda_handler(event,context):
 
