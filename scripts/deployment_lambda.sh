@@ -30,7 +30,7 @@ create_function() {
         --environment Variables="{s3_bucket=$s3_bucket}" \
         --code ImageUri=400582553708.dkr.ecr.us-east-1.amazonaws.com/cenipa-etl:latest \
         --region "$aws_region" \
-        --tags '{"Environment"="Dev", "Name"="ETL-Cenipa"}'
+        --tags '{"Environment":"Dev", "Name":"ETL-Cenipa"}'
 }
 
 if function_exists; then
