@@ -17,6 +17,92 @@ provider "aws" {
   }
 }
 
+
+resource "aws_iam_role" "lambda_role" {
+  name = "lambda_role"
+  assume_role_policy = jsonencode(
+    {
+      Version = "2012-10-17",
+      Statement = [
+            {   
+                Sid = ""
+                Effect = "Allow",
+                Action = [
+                    "sts:AssumeRole"
+                ],
+                Principal = {
+                    Service = "lambda.amazonaws.com"
+                }
+            }
+        ]
+    }
+  )
+}
+
+resource "aws_iam_role_policy" "lambda_policy" {
+  name = "lambda_policy"
+  role = aws_iam_role.lambda_role.id
+  policy = jsonencode(
+    {
+      Version = "2012-10-17",
+      Statement = [
+            {   
+                Sid = ""
+                Effect = "Allow",
+                Action = [
+                    "iam:*",
+                    "rds:*",
+                    "secretsmanager:*",
+                    "s3:*",
+                    "lambda:*",
+                    "ec2:*",
+                    "dynamodb:*",
+                    "glue:*"
+                ],
+                Resource = "*"
+            }
+        ]
+    }
+  )
+}
+
+
+resource "aws_iam_role" "step_function_role" {
+  name = "test_step_function_role"
+  assume_role_policy = jsonencode(
+      {
+      Version = "2012-10-17",
+      Statement = [
+            {
+                Effect = "Allow",
+                Action = [ "sts:AssumeRole" ],
+                Principal = {
+                    Service = "states.amazonaws.com"
+                }
+            }
+        ]
+    }
+  )
+}
+
+resource "aws_iam_role_policy" "step_function_policy" {
+  name = "step_function_policy"
+  role = aws_iam_role.step_function_role.id
+  policy = jsonencode(
+      {
+      Version = "2012-10-17",
+      Statement = [
+            {
+                Effect = "Allow",
+                Action = [ "lambda:InvokeFunction" ],
+                Resource = "*"
+
+            }
+        ]
+    }
+  )
+}
+
 resource "aws_db_instance" "dwinstance" {
   allocated_storage    = 10
   db_name              = "dw"
