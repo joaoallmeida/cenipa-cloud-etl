@@ -241,7 +241,7 @@
                   "pipeline": [
                     {
                       "step": "load",
-                      "date_ref": "None",
+                      "date_ref": null,
                       "create_ddl": true,
                       "tables": [
                         "fat_ocorrencia"
