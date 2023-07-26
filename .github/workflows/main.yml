@@ -38,3 +38,10 @@ jobs:
                 chmod +x ./automation/scripts/deployment_lambda.sh
                 ./automation/scripts/deployment_lambda.sh
               shell: bash
+            
+            - name: Build and Deploy AWS Step Function
+              run: |
+                sam build --template-file ./automation/templates/step_function_template.yaml
+                sam deploy --template-file ./automation/templates/step_function_template.yaml
+                
+                
