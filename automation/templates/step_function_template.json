@@ -222,6 +222,7 @@
                   "pipeline": [
                     {
                       "step": "refined",
+                      "date_ref": null,
                       "tables": [
                         "ocorrencia"
                       ]
@@ -283,6 +284,7 @@
                   "pipeline": [
                     {
                       "step": "refined",
+                      "date_ref": null,
                       "tables": [
                         "recomendacao"
                       ]
