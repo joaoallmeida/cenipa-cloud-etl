@@ -17,11 +17,12 @@ class Refined:
 
     def __upload_refined_data(self, df:pl.DataFrame, table_name:str, dt_ref:str=None) -> None:
 
+        dt_str = datetime.now().strftime('%Y%m%d') if dt_ref is None else dt_ref
+        path = f"s3://{self.bucket}/refined/{table_name}/{table_name}_{dt_str}.parquet"
+        
         self.logger.info(f'Uploading raw data to s3: {path}', extra=extra_fields(Step.UPLOAD, Status.PROCESSING, table_name))
 
         try:
-            dt_str = datetime.now().strftime('%Y%m%d') if dt_ref is None else dt_ref
-            path = f"s3://{self.bucket}/refined/{table_name}/{table_name}_{dt_str}.parquet"
             wr.s3.to_parquet(
                 df=df.to_pandas(),
                 path=path,
