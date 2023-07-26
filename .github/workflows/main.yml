@@ -39,9 +39,11 @@ jobs:
                 ./automation/scripts/deployment_lambda.sh
               shell: bash
             
-            - name: Build and Deploy AWS Step Function
+            - name: Deploy AWS Step Function
               run: |
-                sam build --template-file ./automation/templates/step_function_template.yaml
-                sam deploy --template-file ./automation/templates/step_function_template.yaml
+                aws stepfunctions create-state-machine \
+                  --name cenipa-orchestration \
+                  --role arn:aws:iam::400582553708:role/step_function_role \
+                  --definition "$( cat ./automation/templates/step_function_template.json )"
                 
                 
