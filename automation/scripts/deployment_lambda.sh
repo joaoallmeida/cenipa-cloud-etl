@@ -23,7 +23,7 @@ create_function() {
     aws lambda create-function \
         --function-name "$FUNCTION_NAME" \
         --package-type Image \
-        --role arn:aws:iam::$ACCOUNT_ID:role/service-role/lambda_role \
+        --role arn:aws:iam::$ACCOUNT_ID:role/lambda_role \
         --timeout 600 \
         --memory-size 512 \
         --environment Variables="{s3_bucket=$BUCKET}" \
