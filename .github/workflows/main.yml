@@ -34,16 +34,7 @@ jobs:
                 docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
             - name: Deployment AWS Lambda Function
-              uses: appleboy/lambda-action@v0.1.9
-              with:
-                function_name: cenipa-etl
-                role: arn:aws:iam::400582553708:role/service-role/cenipa-etl-role-o11blh01
-                environment: s3_bucket=cenipa.etl.com.br
-                memory_size: 512
-                timeout: 600
-                image_uri: 400582553708.dkr.ecr.us-east-1.amazonaws.com/cenipa-etl:latest
-                
-              # run: |
-              #   chmod +x ./automation/scripts/deployment_lambda.sh
-              #   ./automation/scripts/deployment_lambda.sh
-              # shell: bash
+              run: |
+                chmod +x ./automation/scripts/deployment_lambda.sh
+                ./automation/scripts/deployment_lambda.sh
+              shell: bash
