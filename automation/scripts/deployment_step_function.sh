@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ACCOUNT_ID = $1
+ACCOUNT_ID=$1
 STATE_MACHINE_NAME="cenipa-etl-orchestration"
 
 # Creating functions for create or update State Machine

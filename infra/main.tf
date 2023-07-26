@@ -68,7 +68,7 @@ resource "aws_iam_role_policy" "lambda_policy" {
 
 
 resource "aws_iam_role" "step_function_role" {
-  name = "test_step_function_role"
+  name = "step_function_role"
   assume_role_policy = jsonencode(
       {
       Version = "2012-10-17",

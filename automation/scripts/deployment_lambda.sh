@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ACCOUNT_ID = $1
+ACCOUNT_ID=$1
 FUNCTION_NAME="cenipa-etl"
 BUCKET="cenipa.etl.com.br"
 
