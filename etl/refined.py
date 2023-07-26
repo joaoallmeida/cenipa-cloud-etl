@@ -15,6 +15,24 @@ class Refined:
         self.awsSession = aws_session
         self.bucket = bucket
 
+    def __upload_refined_data(self, df:pl.DataFrame, table_name:str, dt_ref:str=None) -> None:
+
+        self.logger.info(f'Uploading raw data to s3: {path}', extra=extra_fields(Step.UPLOAD, Status.PROCESSING, table_name))
+
+        try:
+            dt_str = datetime.now().strftime('%Y%m%d') if dt_ref is None else dt_ref
+            path = f"s3://{self.bucket}/refined/{table_name}/{table_name}_{dt_str}.parquet"
+            wr.s3.to_parquet(
+                df=df.to_pandas(),
+                path=path,
+                boto3_session=self.awsSession
+            )
+        except Exception as e:
+            self.logger.error(f'Failed to upload raw data to s3 {table_name}: {traceback.format_exc()}', extra=extra_fields(Step.UPLOAD, Status.FAILURE, table_name, len(df.rows())))
+            raise e
+        
+        self.logger.info(f'Completed upload raw data to s3.', extra=extra_fields(Step.UPLOAD, Status.COMPLETED, table_name, len(df.rows())))
+
     def refine_data(self, tables:list, dt_ref:str=None):
         self.logger.info('Start refined', extra=extra_fields(Step.REFINED_INIT, Status.PROCESSING))
 
@@ -24,7 +42,10 @@ class Refined:
             try:
                 self.logger.info(f'Refining data -> {table}', extra=extra_fields(Step.REFINE,Status.PROCESSING, table))
                 
-                df = self.__read_raw_file(table, dt_ref)
+                dt_str = datetime.now().strftime('%Y%m%d') if dt_ref is None else dt_ref
+                path = f"s3://{self.bucket}/raw/{table}/{table}_{dt_str}.parquet"
+                
+                df = pl.from_pandas(wr.s3.read_parquet( path=path, boto3_session=self.awsSession ))
                 df = Utils.str_cols(df, refined_event[table]['columns_str'], True)
                 df = Utils.str_cols(df, refined_event[table]['columns_str_special'])
                 df = Utils.str_datetime(df, refined_event[table]['columns_date'])
@@ -40,34 +61,4 @@ class Refined:
 
         self.logger.info('Completed refined', extra=extra_fields(Step.REFINED_END, Status.COMPLETED))
 
-    def __read_raw_file(self, table_name:str, dt_ref:str=None) -> pl.DataFrame:
-        try:
-            dt_str = datetime.now().strftime('%Y%m%d') if dt_ref is None else dt_ref
-            path = f"s3://{self.bucket}/raw/{table_name}/{table_name}_{dt_str}.parquet"
 
-            df = wr.s3.read_parquet(
-                path=path,
-                boto3_session=self.awsSession
-            )
-        except Exception as e:
-            raise e
-        return pl.from_pandas(df)
-
-    def __upload_refined_data(self, df:pl.DataFrame, table_name:str, dt_ref:str=None) -> None:
-
-        dt_str = datetime.now().strftime('%Y%m%d') if dt_ref is None else dt_ref
-        path = f"s3://{self.bucket}/refined/{table_name}/{table_name}_{dt_str}.parquet"
-
-        self.logger.info(f'Uploading raw data to s3: {path}', extra=extra_fields(Step.UPLOAD, Status.PROCESSING, table_name))
-
-        try:
-            wr.s3.to_parquet(
-                df=df.to_pandas(),
-                path=path,
-                boto3_session=self.awsSession
-            )
-        except Exception as e:
-            self.logger.error(f'Failed to upload raw data to s3 {table_name}: {traceback.format_exc()}', extra=extra_fields(Step.UPLOAD, Status.FAILURE, table_name, len(df.rows())))
-            raise e
-        
-        self.logger.info(f'Completed upload raw data to s3.', extra=extra_fields(Step.UPLOAD, Status.COMPLETED, table_name, len(df.rows())))

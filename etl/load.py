@@ -24,13 +24,9 @@ class Load:
 
     def check_new_rows_and_changes(self, source:pl.DataFrame, table_name:str, dt_ref:str=None):
 
-        # dt_str = (datetime.now() - timedelta(1)).strftime('%Y%m%d') if dt_ref is None else dt_ref
-        # s3_path = f"s3://{self.bucket}/refined/{table_name}/{table_name}_{dt_str}.parquet"
-
         self.logger.info(f'Reading table target: {table_name}.', extra=extra_fields(Step.READ, Status.PROCESSING, table=table_name))
 
         try:
-            # target = pl.from_pandas(wr.s3.read_parquet( path=s3_path, boto3_session=aws_session ))
             target = pl.read_database(f'SELECT * FROM {table_name}', self.uri).drop(['criado_em','criado_por','atualizado_em','atualizado_por'])
             insert = source.filter(~source.to_series().is_in(target.to_series()))
 
@@ -48,7 +44,6 @@ class Load:
                 self.logger.info(f'Completed insert new rows into table {table_name}.', extra=extra_fields(Step.INSERT, Status.COMPLETED, table=table_name, lines=len(insert.rows())))
 
                 target = pl.read_database(f'SELECT * FROM {table_name}', self.uri).drop(['criado_em','criado_por','atualizado_em','atualizado_por'])
-                # target = target.extend(insert)
 
             diff = source == target
             changes = source.filter(~pl.all(diff))
@@ -90,7 +85,7 @@ class Load:
         self.logger.info(f'Creating {table_name.title()}.',  extra=extra_fields(Step.CREATE, Status.PROCESSING, table_name.title()))
 
         try:
-            
+
             dt_str = datetime.now().strftime('%Y%m%d') if dt_ref is None else dt_ref
             folder_s3 = f"s3://{self.bucket}/refined/{table_name[4:]}/{table_name[4:]}_{dt_str}.parquet"
 

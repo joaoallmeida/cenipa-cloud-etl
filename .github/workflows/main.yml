@@ -30,16 +30,20 @@ jobs:
                 REPOSITORY: cenipa-etl
                 IMAGE_TAG: latest
               run: |
-                docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+                docker build -f ./docker/Dockerfile -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
                 docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
-            # - name: Set up Python
-            #   uses: actions/setup-python@v4
-            #   with:
-            #     python-version: '3.10'
-
-            - name: Deployment Lambda Function
-              run: |
-                chmod +x ./scripts/deployment_lambda.sh
-                ./scripts/deployment_lambda.sh
-              shell: bash
+            - name: Deployment AWS Lambda Function
+              uses: appleboy/lambda-action@v0.1.9
+              with:
+                function_name: cenipa-etl
+                role: arn:aws:iam::400582553708:role/service-role/cenipa-etl-role-o11blh01
+                environment: s3_bucket=cenipa.etl.com.br
+                memory_size: 512
+                timeout: 600
+                image_uri: 400582553708.dkr.ecr.us-east-1.amazonaws.com/cenipa-etl:latest
+                
+              # run: |
+              #   chmod +x ./automation/scripts/deployment_lambda.sh
+              #   ./automation/scripts/deployment_lambda.sh
+              # shell: bash
