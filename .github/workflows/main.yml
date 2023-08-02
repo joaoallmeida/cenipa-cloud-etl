@@ -1,4 +1,4 @@
-name: Deployment AWS Lambda Function
+name: Deployment AWS Services
 
 on: workflow_dispatch
 
@@ -17,6 +17,24 @@ jobs:
                 aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
                 aws-secret-access-key: ${{ secrets.AWS_SECRETE_ACCESS_KEY }}
                 aws-region: us-east-1
+                
+            - name: Setup Terraform
+              uses: hashicorp/setup-terraform@v2
+              with:
+                terraform_version: 5.9.0
+                terraform_wrapper: false
+            
+            - name: Terraform Init
+              working-directory: ./infra/main.tf
+              run: terraform init
+
+            - name: Terraform Plan
+              working-directory: ./infra/main.tf
+              run: terraform plan -no-color
+
+            - name: Terraform Apply
+              working-directory: ./infra/main.tf
+              run: terraform apply -no-color
 
             - name: Login to Amazon ECR
               id: login-ecr

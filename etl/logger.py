@@ -8,6 +8,15 @@ import getpass
 import boto3
 import time
 
+def extra_fields(step:enum.Enum, status:enum.Enum, table:str='N/D', lines:int=0) -> dict:
+    data = {
+        "table_name": {"S":table},
+        "status": {"S":status.value},
+        "execution_step": {"S":step.value},
+        "num_affected_lines":{"N":str(lines)},
+    }
+    return data
+
 class Status(enum.Enum):
     PROCESSING = 'P'
     COMPLETED = 'C'
@@ -32,25 +41,6 @@ class Step(enum.Enum):
     INSERT = 'INSERT'
     UPDATE = 'UPDATE'
     UPLOAD = 'UPLOAD'
-
-
-def extra_fields(step:enum.Enum, status:enum.Enum, table:str='N/D', lines:int=0, storage:str='dynamoDb') -> dict:
-    if storage != 'dynamoDb':
-        data = {
-            "table_name": table,
-            "status": status.value,
-            "execution_step": step.value,
-            "num_affected_lines":lines,
-        }
-    else:
-        data = {
-            "table_name": {"S":table},
-            "status": {"S":status.value},
-            "execution_step": {"S":step.value},
-            "num_affected_lines":{"N":str(lines)},
-        }
-    return data
-
 
 class DynamoDbHandler(Handler):
 
