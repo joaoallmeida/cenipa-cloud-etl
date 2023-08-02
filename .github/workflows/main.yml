@@ -44,10 +44,10 @@ jobs:
               working-directory: ./infra/
               shell: bash
               run: |
-                if ${{ github.event.inputs.destroy }} == false; then
-                  terraform apply -auto-approve
-                else
+                if ${{ github.event.inputs.destroy }}; then
                   terraform destroy -auto-approve
+                else
+                  terraform apply -auto-approve
                 fi
 
             - name: Login to Amazon ECR
