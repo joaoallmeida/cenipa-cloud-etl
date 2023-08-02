@@ -25,16 +25,22 @@ jobs:
                 terraform_wrapper: false
             
             - name: Terraform Init
-              working-directory: infra/main.tf
-              run: terraform init
+              working-directory: ./infra/
+              shell: bash
+              run: |
+                 terraform init
 
             - name: Terraform Plan
-              working-directory: infra/main.tf
-              run: terraform plan -no-color
+              working-directory: ./infra/
+              shell: bash
+              run: |
+                 terraform plan -no-color
 
             - name: Terraform Apply
-              working-directory: infra/main.tf
-              run: terraform apply -no-color
+              working-directory: ./infra/
+              shell: bash
+              run: |
+                 terraform apply -no-color
 
             - name: Login to Amazon ECR
               id: login-ecr
