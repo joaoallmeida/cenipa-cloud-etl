@@ -1,69 +1,93 @@
 name: Deployment AWS Services
 
-on: workflow_dispatch
+on: 
+  workflow_dispatch:
+    inputs:
+      destroy:
+        default: false
+        type: boolean
+        required: false
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
 
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v3
-        
-            - name: Configure AWS credentials
-              id: credentials 
-              uses: aws-actions/configure-aws-credentials@v2
-              with:
-                aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-                aws-secret-access-key: ${{ secrets.AWS_SECRETE_ACCESS_KEY }}
-                aws-region: us-east-1
-                
-            - name: Setup Terraform
-              uses: hashicorp/setup-terraform@v2
-              with:
-                terraform_version: 1.5.3
-                terraform_wrapper: false
-            
-            - name: Terraform Init
-              working-directory: ./infra/
-              shell: bash
-              run: |
-                 terraform init
+  terraform:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./infra/  
+    steps:  
+          - name: Setup Terraform
+            uses: hashicorp/setup-terraform@v2
+            with:
+              terraform_version: 1.5.3
+              terraform_wrapper: false
 
-            - name: Terraform Plan
-              working-directory: ./infra/
-              shell: bash
-              run: |
-                 terraform plan -no-color
+          - name: Terraform Init
+            shell: bash
+            run: terraform init
+            env:
+              AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+              AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRETE_ACCESS_KEY }}
+              AWS_DEFAULT_REGION: us-east-1
+              
+          - name: Terraform Plan
+            shell: bash
+            run: terraform plan
+            env:
+              AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+              AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRETE_ACCESS_KEY }}
+              AWS_DEFAULT_REGION: 
+              
+          - name: Terraform Apply
+            id: apply
+            if: "${{ github.event.inputs.destroy == false }} "
+            run: terraform apply -auto-approve
 
-            - name: Terraform Apply
-              working-directory: ./infra/
-              shell: bash
-              run: |
-                 terraform apply -auto-approve -no-color
+          - name: Terraform Destroy
+            if: "${{ github.event.inputs.destroy == true }} "
+            shell: bash
+            run: terraform destroy -auto-approve
+            env:
+              AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+              AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRETE_ACCESS_KEY }}
+              AWS_DEFAULT_REGION: us-east-1
 
-            - name: Login to Amazon ECR
-              id: login-ecr
-              uses: aws-actions/amazon-ecr-login@v1
+  build:
+      runs-on: ubuntu-latest
+      steps:
+          - name: Checkout
+            uses: actions/checkout@v3
+      
+          - name: Configure AWS credentials
+            id: credentials 
+            uses: aws-actions/configure-aws-credentials@v2
+            with:
+              aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+              aws-secret-access-key: ${{ secrets.AWS_SECRETE_ACCESS_KEY }}
+              aws-region: us-east-1
+              
+          - name: Login to Amazon ECR
+            id: login-ecr
+            uses: aws-actions/amazon-ecr-login@v1
 
-            - name: Build, tag, and push docker image to Amazon ECR
-              env:
-                REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-                REPOSITORY: cenipa-etl
-                IMAGE_TAG: latest
-              run: |
-                docker build -f ./docker/Dockerfile -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
-                docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          - name: Build, tag, and push docker image to Amazon ECR
+            env:
+              REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+              REPOSITORY: cenipa-etl
+              IMAGE_TAG: latest
+            run: |
+              docker build -f ./docker/Dockerfile -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+              docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
-            - name: Deployment AWS Lambda Function
-              run: |
-                chmod +x ./automation/scripts/deployment_lambda.sh
-                ./automation/scripts/deployment_lambda.sh ${{ steps.credentials.outputs.aws-account-id }}
-              shell: bash
-            
-            - name: Deploy AWS Step Function
-              run: |
-                chmod +x ./automation/scripts/deployment_step_function.sh
-                ./automation/scripts/deployment_step_function.sh ${{ steps.credentials.outputs.aws-account-id }}
-                
+          - name: Deployment AWS Lambda Function
+            run: |
+              chmod +x ./automation/scripts/deployment_lambda.sh
+              ./automation/scripts/deployment_lambda.sh ${{ steps.credentials.outputs.aws-account-id }}
+            shell: bash
+          
+          - name: Deploy AWS Step Function
+            run: |
+              chmod +x ./automation/scripts/deployment_step_function.sh
+              ./automation/scripts/deployment_step_function.sh ${{ steps.credentials.outputs.aws-account-id }}
+              
                 
