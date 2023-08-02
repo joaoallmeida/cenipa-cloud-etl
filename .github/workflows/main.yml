@@ -40,7 +40,7 @@ jobs:
               working-directory: ./infra/
               shell: bash
               run: |
-                 terraform apply -no-color
+                 terraform apply -auto-approve -no-color
 
             - name: Login to Amazon ECR
               id: login-ecr
