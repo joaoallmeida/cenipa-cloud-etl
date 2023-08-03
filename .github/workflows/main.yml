@@ -13,7 +13,7 @@ on:
 jobs:
 
   terraform_build:
-    if: "${{ github.event.inputs.action == 'terraform_apply'}} "
+    if: github.event.inputs.action == 'terraform_apply'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -53,7 +53,7 @@ jobs:
               AWS_DEFAULT_REGION: us-east-1
                 
   terraform_destroy:
-    if: "${{ github.event.inputs.action == 'terraform_destroy'}} "
+    if: github.event.inputs.action == 'terraform_destroy'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -85,7 +85,7 @@ jobs:
               AWS_DEFAULT_REGION: us-east-1
 
   aws_build:
-      if: "${{ github.event.inputs.action == 'terraform_apply'}} "
+      if: github.event.inputs.action == 'terraform_apply'
       runs-on: ubuntu-latest
       steps:
           - name: Checkout
