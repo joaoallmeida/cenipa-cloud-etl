@@ -22,6 +22,14 @@ jobs:
           - name: Checkout
             uses: actions/checkout@v2
 
+          - name: Configure AWS credentials
+            id: credentials 
+            uses: aws-actions/configure-aws-credentials@v2
+            with:
+              aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+              aws-secret-access-key: ${{ secrets.AWS_SECRETE_ACCESS_KEY }}
+              aws-region: us-east-1
+
           - name: Setup Terraform
             uses: hashicorp/setup-terraform@v2
             with:
@@ -31,26 +39,20 @@ jobs:
           - name: Terraform Init
             shell: bash
             run: terraform init
-            env:
-              AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-              AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRETE_ACCESS_KEY }}
-              AWS_DEFAULT_REGION: us-east-1
               
           - name: Terraform Plan
             shell: bash
             run: terraform plan
-            env:
-              AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-              AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRETE_ACCESS_KEY }}
-              AWS_DEFAULT_REGION: us-east-1
                 
           - name: Terraform Apply
+            id: apply
             shell: bash
             run: terraform apply -auto-approve
-            env:
-              AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-              AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRETE_ACCESS_KEY }}
-              AWS_DEFAULT_REGION: us-east-1
+
+          - name: AWS Plan Copy
+            if: steps.apply.outcome == 'success'
+            run: aws s3 cp terraform.tfstate s3://cenipa.etl.com.br/terraform/terraform.tfstate
+            id: copy    
                 
   terraform_destroy:
     if: github.event.inputs.action == 'terraform_destroy'
@@ -62,27 +64,31 @@ jobs:
           - name: Checkout
             uses: actions/checkout@v2
 
+          - name: Configure AWS credentials
+            id: credentials 
+            uses: aws-actions/configure-aws-credentials@v2
+            with:
+              aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+              aws-secret-access-key: ${{ secrets.AWS_SECRETE_ACCESS_KEY }}
+              aws-region: us-east-1
+
           - name: Setup Terraform
             uses: hashicorp/setup-terraform@v2
             with:
               terraform_version: 1.5.3
               terraform_wrapper: false
           
+          - name: AWS Plan Copy
+            run: aws s3 cp s3://cenipa.etl.com.br/terraform/terraform.tfstate terraform.tfstate
+            id: copy
+
           - name: Terraform Init
             shell: bash
             run: terraform init
-            env:
-              AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-              AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRETE_ACCESS_KEY }}
-              AWS_DEFAULT_REGION: us-east-1
 
           - name: Terraform Destroy
             shell: bash
             run: terraform destroy -auto-approve
-            env:
-              AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-              AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRETE_ACCESS_KEY }}
-              AWS_DEFAULT_REGION: us-east-1
 
   aws_build:
       if: github.event.inputs.action == 'terraform_apply'
