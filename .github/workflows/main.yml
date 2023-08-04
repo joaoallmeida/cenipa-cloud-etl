@@ -1,4 +1,4 @@
-name: Deployment AWS Services
+name: Deployment ETL Cenipa 
 
 on: 
   workflow_dispatch:
