@@ -11,9 +11,7 @@ aws_session = boto3.Session(region_name='us-east-1')
 def fetch_data(table:str):
     
     pymysql.install_as_MySQLdb()
-
-    url = Utils.get_glue_connection(aws_session, 'rds_mysql')
-    conn = st.experimental_connection('rds_conn',type='sql',url=url)
+    conn = st.experimental_connection('mysql',type='sql')
     data = conn.query(f"SELECT * FROM {table}")
 
     return data
