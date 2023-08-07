@@ -24,7 +24,7 @@ class Utils:
             df = df.to_pandas()
             for col in cols:
                     if str_case:
-                        df[col] = df[col].str.replace(r"*",'Outros').str.title()
+                        df[col] = df[col].str.replace("***",'Outros').str.title()
                     else:
                         df[col] = (df[col].str.replace(r'\t', '')
                                         .str.replace(r'\\', '')
