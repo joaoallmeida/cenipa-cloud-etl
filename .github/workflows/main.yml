@@ -9,7 +9,7 @@ on:
           - build
           - destroy
           - update
-        required: false
+        required: true
 
 jobs:
 
