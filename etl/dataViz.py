@@ -27,16 +27,14 @@ def ocorrencias(tab:st.tabs, plot_config:dict):
         uf = st.multiselect('UF', ocorrencia_df['ocorrencia_uf'].sort_values().unique(), default=ocorrencia_df['ocorrencia_uf'].sort_values().unique())
         classificacao = st.multiselect('Classificacao', ocorrencia_df['ocorrencia_classificacao'].sort_values().unique(), default=ocorrencia_df['ocorrencia_classificacao'].sort_values().unique())
         aeronave_tipo = st.multiselect('Tipo Aeronave', aeronave_df['aeronave_tipo_veiculo'].sort_values().unique(), default=aeronave_df['aeronave_tipo_veiculo'].sort_values().unique())
-        aeronave_segmento = st.multiselect('Segmento Aeronave', aeronave_df['aeronave_registro_segmento'].sort_values().unique(), default=aeronave_df['aeronave_registro_segmento'].sort_values().unique())
+        aeronave_segmento = st.multiselect('Segmento Aeronave', aeronave_df['aeronave_registro_segmento'].sort_values().unique(), default=aeronave_df['aeronave_registro_segmento'].sort_values().unique(), )
 
     
+    aeronave_df_select = aeronave_df[(aeronave_df['aeronave_tipo_veiculo'].isin(aeronave_tipo)) & (aeronave_df['aeronave_registro_segmento'].isin(aeronave_segmento))]
     ocorrencia_df_select = ocorrencia_df[((ocorrencia_df['ocorrencia_dia'].dt.date >= dateFilterStart) & (ocorrencia_df['ocorrencia_dia'].dt.date <= dateFilterEnd)) &
                                 (ocorrencia_df['ocorrencia_uf'].isin(uf)) &
                                 (ocorrencia_df['ocorrencia_classificacao'].isin(classificacao) )
                                 ]
-    
-    aeronave_df_select = aeronave_df[(aeronave_df['aeronave_tipo_veiculo'].isin(aeronave_tipo)) & (aeronave_df['aeronave_registro_segmento'].isin(aeronave_segmento))]
-
 
     merge_ocorrencia_df = ocorrencia_tipo_df.merge(ocorrencia_df_select, left_on='codigo_ocorrencia', right_on='codigo_ocorrencia_tipo')
     merge_aeronave_df = aeronave_df_select.merge(ocorrencia_df_select, left_on='codigo_ocorrencia', right_on='codigo_ocorrencia_aeronave')
@@ -57,63 +55,42 @@ def ocorrencias(tab:st.tabs, plot_config:dict):
         ocorre_col1, ocorre_col2, ocorre_col3 = st.columns(3)
 
         data_ocorre_ano = ocorrencia_df.groupby(['ocorrencia_classificacao', 'ano']).size().reset_index(name='total')
-        grouped_df = merge_aeronave_df.groupby(['aeronave_registro_categoria', 'ocorrencia_classificacao']).size().reset_index(name='count')
-        
+
         with ocorre_col1:
             st.subheader('Acidentes')
-            st.bar_chart(data_ocorre_ano[data_ocorre_ano['ocorrencia_classificacao'] == 'Acidente'], x='ano', y='total')
+            fig = px.bar(data_ocorre_ano[data_ocorre_ano['ocorrencia_classificacao'] == 'Acidente'], x='ano', y='total')
+            fig.update_layout( showlegend=False ,yaxis_title=None ,xaxis_title=None )
+            fig.update_traces(marker_color='lightskyblue')
+            st.plotly_chart(fig, theme='streamlit', use_container_width=True, config=plot_config)
             
-            data = grouped_df[grouped_df['ocorrencia_classificacao'] == 'Acidente'][['aeronave_registro_categoria','count']].rename({"aeronave_registro_categoria":"Categoria"},axis=1)
-            st.dataframe(data, hide_index=True, use_container_width=True, column_config={
-                "count": st.column_config.ProgressColumn(
-                "Acidentes",
-                format="%f",
-                min_value=0,
-                max_value=10000,
-                )
-            } ) 
-
         with ocorre_col2:
             st.subheader('Incidentes')
-            st.bar_chart(data_ocorre_ano[data_ocorre_ano['ocorrencia_classificacao'] == 'Incidente'], x='ano', y='total')
-
-            data = grouped_df[grouped_df['ocorrencia_classificacao'] == 'Incidente'][['aeronave_registro_categoria','count']].rename({"aeronave_registro_categoria":"Categoria"},axis=1)
-            st.dataframe( data , hide_index=True, use_container_width=True, column_config={
-                "count": st.column_config.ProgressColumn(
-                "Incidentes",
-                format="%f",
-                min_value=0,
-                max_value=10000,
-                )
-            } )
+            fig = px.bar(data_ocorre_ano[data_ocorre_ano['ocorrencia_classificacao'] == 'Incidente'], x='ano', y='total')
+            fig.update_layout( showlegend=False ,yaxis_title=None ,xaxis_title=None  )
+            fig.update_traces(marker_color='royalblue')
+            st.plotly_chart(fig, theme='streamlit', use_container_width=True, config=plot_config)
 
         with ocorre_col3:
             st.subheader('Incidentes Graves')
-            st.bar_chart(data_ocorre_ano[data_ocorre_ano['ocorrencia_classificacao'] == 'Incidente Grave'], x='ano', y='total')
-
-            data = grouped_df[grouped_df['ocorrencia_classificacao'] == 'Incidente Grave'][['aeronave_registro_categoria','count']].rename({"aeronave_registro_categoria":"Categoria"},axis=1)
-            st.dataframe(data, hide_index=True, use_container_width=True, column_config={
-                "count": st.column_config.ProgressColumn(
-                "Incidentes Graves",
-                format="%f",
-                min_value=0,
-                max_value=10000,
-                )
-            } ) 
+            fig = px.bar(data_ocorre_ano[data_ocorre_ano['ocorrencia_classificacao'] == 'Incidente Grave'], x='ano', y='total')
+            fig.update_layout( showlegend=False ,yaxis_title=None ,xaxis_title=None  )
+            fig.update_traces(marker_color='lightpink')
+            st.plotly_chart(fig, theme='streamlit', use_container_width=True, config=plot_config)
 
         st.divider()
         categorie_col1, categorie_col2 = st.columns(2)
 
         with categorie_col1:
             st.subheader('Categoria')
-            data = aeronave_df.groupby(['aeronave_registro_categoria']).size().reset_index(name='total')
-            fig = px.bar(data, y='aeronave_registro_categoria', x='total', text_auto=True, orientation='h')
+            data = merge_aeronave_df.groupby(['aeronave_registro_categoria', 'ocorrencia_classificacao']).size().reset_index(name='total')
+            fig = px.bar(data, y='aeronave_registro_categoria', x='total', color='ocorrencia_classificacao', text_auto=True, orientation='h')
             fig.update_layout( showlegend=False ,yaxis_title=None ,xaxis_title=None  )
             st.plotly_chart(fig, theme='streamlit',use_container_width=True, config=plot_config)
+
         with categorie_col2:
             st.subheader('Segmento')
-            data_seg = aeronave_df.groupby(['aeronave_registro_segmento']).size().reset_index(name='total')
-            fig = px.bar(data_seg, y='aeronave_registro_segmento', x='total',text_auto=True, orientation='h')
+            data_seg = merge_aeronave_df.groupby(['aeronave_registro_segmento', 'ocorrencia_classificacao']).size().reset_index(name='total')
+            fig = px.bar(data_seg, y='aeronave_registro_segmento', x='total', color='ocorrencia_classificacao',text_auto=True, orientation='h')
             fig.update_layout( showlegend=False ,yaxis_title=None ,xaxis_title=None  )
             st.plotly_chart(fig, theme='streamlit', use_container_width=True, config=plot_config)
 
@@ -141,14 +118,14 @@ def ocorrencias(tab:st.tabs, plot_config:dict):
             st.subheader('Tipo Ocorrência')
             data = merge_ocorrencia_df.groupby(['ocorrencia_tipo','ocorrencia_classificacao']).size().reset_index(name='total')
             fig = px.bar(data, y='ocorrencia_tipo', x='total', color='ocorrencia_classificacao', text_auto=True, orientation='h')
-            fig.update_layout( showlegend=True ,yaxis_title=None ,xaxis_title=None  )
+            fig.update_layout( showlegend=False ,yaxis_title=None ,xaxis_title=None  )
             st.plotly_chart(fig, theme='streamlit', use_container_width=True, config=plot_config)
 
         with types_col2:
             st.subheader('Fabricante')
             data_model_fab = merge_aeronave_df.groupby(['aeronave_fabricante', 'ocorrencia_classificacao']).size().reset_index(name='total')
             fig = px.bar(data_model_fab, y='aeronave_fabricante', x='total', color='ocorrencia_classificacao', text_auto=True, orientation='h')
-            fig.update_layout( showlegend=True ,yaxis_title=None ,xaxis_title=None )
+            fig.update_layout( showlegend=False ,yaxis_title=None ,xaxis_title=None )
             st.plotly_chart(fig, theme='streamlit', use_container_width=True, config=plot_config)
 
         st.divider()
@@ -166,7 +143,7 @@ def ocorrencias(tab:st.tabs, plot_config:dict):
             st.subheader('Fatores Contribuintes')
             data_model_fator = merge_fator_df.groupby(['fator_nome', 'ocorrencia_classificacao']).size().reset_index(name='total')
             fig = px.bar(data_model_fator, y='fator_nome', x='total', color='ocorrencia_classificacao', text_auto=True, orientation='h')
-            fig.update_layout( showlegend=True ,yaxis_title=None ,xaxis_title=None )
+            fig.update_layout( showlegend=False ,yaxis_title=None ,xaxis_title=None )
             st.plotly_chart(fig, theme='streamlit', use_container_width=True, config=plot_config)
 
 
@@ -183,7 +160,7 @@ def recomendacoes(tab:st.tabs):
 
         merge_df = merge_df[['ocorrencia_dia','aeronave_matricula', 'ocorrencia_classificacao','recomendacao_numero', 'recomendacao_destinatario', 'recomendacao_conteudo']]
         merge_df = merge_df.rename({'ocorrencia_dia':'Data Ocorrência','aeronave_matricula': 'Aeronave', 'ocorrencia_classificacao': 'Classificação','recomendacao_numero': "N Recomendação", 'recomendacao_destinatario':'Destinatario', 'recomendacao_conteudo':'Conteúdo Recomendação'}, axis=1) 
-        st.dataframe(merge_df, hide_index=True)
+        st.table(merge_df)
 
 def panorama(tab:st.tabs, plot_config:dict):
 
@@ -197,7 +174,7 @@ def panorama(tab:st.tabs, plot_config:dict):
         st.header('Acidentes nos últimos 10 anos')
         data_model_fator = merge_ocorrencia_df.groupby(['ano', 'ocorrencia_classificacao']).size().reset_index(name='total')
         fig = px.bar(data_model_fator, x='ano', y='total', color='ocorrencia_classificacao', text_auto=True, barmode='group')
-        fig.update_layout( showlegend=True ,yaxis_title=None ,xaxis_title=None )
+        fig.update_layout( showlegend=False ,yaxis_title=None ,xaxis_title=None )
         st.plotly_chart(fig, theme='streamlit', use_container_width=True, config=plot_config)
 
 
@@ -206,13 +183,7 @@ def main():
     st.set_page_config(
         page_title="CENIPA Dashboard",
         page_icon=":airplane:",
-        layout="wide",
-        # menu_items={
-        #     'About': """
-        #         # It is a sample of real-time data streaming dashboard for cryptocurrency. 
-        #         # 💰🤑
-        #         # """
-        # }
+        layout="wide"
     )
     
 
