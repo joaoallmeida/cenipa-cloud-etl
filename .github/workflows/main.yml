@@ -6,14 +6,15 @@ on:
       action:
         type: choice
         options:
-          - terraform_apply
-          - terraform_destroy
+          - build
+          - destroy
+          - update
         required: false
 
 jobs:
 
   terraform_build:
-    if: github.event.inputs.action == 'terraform_apply'
+    if: github.event.inputs.action == 'build'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -55,7 +56,7 @@ jobs:
             id: copy    
                 
   terraform_destroy:
-    if: github.event.inputs.action == 'terraform_destroy'
+    if: github.event.inputs.action == 'destroy'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -91,7 +92,7 @@ jobs:
             run: terraform destroy -auto-approve
 
   aws_build:
-      if: github.event.inputs.action == 'terraform_apply'
+      if: github.event.inputs.action == 'build' || github.event.inputs.action == 'update'
       runs-on: ubuntu-latest
       needs: terraform_build
       steps:
@@ -129,5 +130,36 @@ jobs:
             run: |
               chmod +x ./automation/scripts/deployment_step_function.sh
               ./automation/scripts/deployment_step_function.sh ${{ steps.credentials.outputs.aws-account-id }}
+
+  aws_destroy:
+      if: github.event.inputs.action == 'destroy'
+      runs-on: ubuntu-latest
+      needs: terraform_build
+      steps:
+          - name: Checkout
+            uses: actions/checkout@v3
+      
+          - name: Configure AWS credentials
+            id: credentials 
+            uses: aws-actions/configure-aws-credentials@v2
+            with:
+              aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+              aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              aws-region: us-east-1
+              
+          - name: Login to Amazon ECR
+            id: login-ecr
+            uses: aws-actions/amazon-ecr-login@v1
+
+          - name: Deleting AWS Lambda Function
+            run: |
+              chmod +x ./automation/scripts/deployment_lambda.sh
+              ./automation/scripts/deployment_lambda.sh ${{ steps.credentials.outputs.aws-account-id }} 1
+            shell: bash
+          
+          - name: Deleting AWS Step Function
+            run: |
+              chmod +x ./automation/scripts/deployment_step_function.sh
+              ./automation/scripts/deployment_step_function.sh ${{ steps.credentials.outputs.aws-account-id }} 1
               
                 

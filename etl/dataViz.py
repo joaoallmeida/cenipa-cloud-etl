@@ -24,7 +24,6 @@ def ocorrencias(tab:st.tabs, plot_config:dict):
     with st.sidebar:
         st.header('Filtros')
         dateFilterStart, dateFilterEnd = st.date_input('Dia Ocorrencia', value=[ocorrencia_df['ocorrencia_dia'].min(),ocorrencia_df['ocorrencia_dia'].max()], disabled=False )
-        # localidade = st.multiselect('Localidade', ocorrencia_df['ocorrencia_cidade'].sort_values().unique())
         uf = st.multiselect('UF', ocorrencia_df['ocorrencia_uf'].sort_values().unique(), default=ocorrencia_df['ocorrencia_uf'].sort_values().unique())
         classificacao = st.multiselect('Classificacao', ocorrencia_df['ocorrencia_classificacao'].sort_values().unique(), default=ocorrencia_df['ocorrencia_classificacao'].sort_values().unique())
         aeronave_tipo = st.multiselect('Tipo Aeronave', aeronave_df['aeronave_tipo_veiculo'].sort_values().unique(), default=aeronave_df['aeronave_tipo_veiculo'].sort_values().unique())
@@ -34,7 +33,6 @@ def ocorrencias(tab:st.tabs, plot_config:dict):
     ocorrencia_df_select = ocorrencia_df[((ocorrencia_df['ocorrencia_dia'].dt.date >= dateFilterStart) & (ocorrencia_df['ocorrencia_dia'].dt.date <= dateFilterEnd)) &
                                 (ocorrencia_df['ocorrencia_uf'].isin(uf)) &
                                 (ocorrencia_df['ocorrencia_classificacao'].isin(classificacao) )
-                                #  ( ocorrencia_df['ocorrencia_cidade'].isin(localidade)) &
                                 ]
     
     aeronave_df_select = aeronave_df[(aeronave_df['aeronave_tipo_veiculo'].isin(aeronave_tipo)) & (aeronave_df['aeronave_registro_segmento'].isin(aeronave_segmento))]

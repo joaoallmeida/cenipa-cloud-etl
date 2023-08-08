@@ -1,6 +1,7 @@
 #!/bin/bash
 
 ACCOUNT_ID=$1
+DELETE=$2 
 FUNCTION_NAME="cenipa-etl"
 BUCKET="cenipa.etl.com.br"
 
@@ -31,8 +32,17 @@ create_function() {
         --tags '{"Environment":"Dev", "Name":"ETL-Cenipa"}'
 }
 
+delete_function() {
+    echo "Deleting Lambda $FUNCTION_NAME"
+    aws lambda delete-function --function-name "$FUNCTION_NAME"
+}
+
 if function_exists; then
-    update_function
+    if [ "$DELETE" -eq 1 ]; then
+        delete_function
+    else
+        update_function
+    fi
 else
     create_function
 fi
