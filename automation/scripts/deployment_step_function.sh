@@ -2,11 +2,12 @@
 
 ACCOUNT_ID=$1
 DELETE=$2
+REGION="us-east-1"
 STATE_MACHINE_NAME="cenipa-etl-orchestration"
 
 # Creating functions for create or update State Machine
 state_machine_exists() {
-    aws stepfunctions describe-state-machine --state-machine-arn "arn:aws:states:$REGION:$ACCOUNT_ID:stateMachine:$STATE_MACHINE_NAME" 2>/dev/null
+    aws stepfunctions describe-state-machine --state-machine-arn "arn:aws:states:$REGION:$ACCOUNT_ID:stateMachine:$STATE_MACHINE_NAME" >/dev/null 2>&1
 }
 
 update_state_machine() {
