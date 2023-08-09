@@ -1,4 +1,4 @@
-# CENIPA ETL Pipeline
+# CENIPA Cloud ETL Pipeline
 ## Overview
 
 Com o objetivo de aprimorar minhas habilidades em construção de ETL de dados e explorar novas ferramentas e tecnologias de desenvolvimento na área de dados, embarquei em um projeto que utiliza os dados do CENIPA (Centro de Investigação e Prevenção de Acidentes Aeronáuticos). 
@@ -36,6 +36,12 @@ Para a parte de infraestrutura deste projeto, foi utilizado a ferramenta **Terra
 Desta forma utlizando o terraform é possivel proporcionar uma automatizacao e flexibilidade na utilização de servições AWS.
 
 O projeto faz a utilização do **Github Actions** para realizar o deploy de forma automatizada dos serviçõs *Lambda Function* e *Step Function*.
+
+## Arquitetura
+
+Para visualizar a arquitetura do projeto, apresento o seguinte diagrama:
+
+![Alt text](docs/img/CENIPA-Diagrama.jpg)
 
 ## Como utilizar - Passo a Passo
 
